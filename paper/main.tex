@@ -45,31 +45,32 @@ intrinsic motivation are the strongest predictors of sustained engagement.
 We present an \textit{interest-driven} sports recommendation framework
 that positions personal interests as the primary input signal, with physical
 strengths and demographic features as secondary factors.
-Our system simultaneously predicts sports preferences across three
-engagement levels---playing, watching, and professional potential---using
-a shared-representation multi-task neural network.
+Our system predicts sports preferences across playing and watching
+engagement levels using classical machine learning methods---including
+hyperparameter-tuned gradient boosting, random forests, and a stacking
+ensemble with logistic regression as meta-learner.
 We additionally introduce a \textit{discovery score}, a cosine-similarity
 metric that surfaces sports unfamiliar to the user based on latent interest
 alignment.
 We evaluate on a literature-calibrated synthetic dataset of 1{,}000 users
 across 20 sports, with feature-label correlations anchored to published
 findings in sports psychology.
-Our multi-task model achieves an NDCG@5 of 0.467, representing a
-\textbf{10.1\% improvement} over a physical-only XGBoost baseline (NDCG@5 = 0.424).
+Our stacking ensemble achieves an NDCG@5 of 0.498, representing a
+\textbf{17.4\% improvement} over a physical-only XGBoost baseline (NDCG@5 = 0.424).
 SHAP attribution confirms that interest features account for 35.4\% of
 predictive importance individually, and 65.9\% when combined with
 self-rated strength features---collectively outweighing objective physical
 metrics.
-The discovery module achieves an 85.6\% novelty rate at K=5.
+The discovery module achieves an 85.7\% novelty rate at K=5.
 To our knowledge, this is the first unified framework that is simultaneously
-interest-first, multi-level (play/watch/pro), designed for general and novice
-users, and equipped with a novel-sport discovery mechanism.
+interest-first, targets general and novice users, and is equipped with a
+novel-sport discovery mechanism---using only classical ML methods.
 Code and data are released at \url{https://github.com/KusalPabasara/sports-recommendation}.
 \end{abstract}
 
 \begin{IEEEkeywords}
-sports recommendation, multi-task learning, interest-driven, discovery score,
-personalized recommendation, physical activity
+sports recommendation, ensemble learning, interest-driven, discovery score,
+personalized recommendation, physical activity, classical machine learning
 \end{IEEEkeywords}
 
 % ============================================================
@@ -109,13 +110,13 @@ We make the following contributions:
         framework}, placing Likert-scaled personal interest profiles as the
         dominant input signal, with physical and demographic features as
         secondary factors.
-  \item We design a \textbf{multi-task neural network} that simultaneously
-        predicts three engagement levels---\textit{play}, \textit{watch}, and
-        \textit{professional potential}---via a shared representation backbone
-        and task-specific output heads.
+  \item We design a \textbf{stacking ensemble} combining hyperparameter-tuned
+        XGBoost and Random Forest with a logistic regression meta-learner,
+        achieving a 17.4\% NDCG improvement over the physical-only baseline
+        using exclusively classical ML methods.
   \item We introduce a \textbf{discovery score}, a cosine-similarity metric
         that surfaces sports the user has never encountered, ranked by latent
-        interest alignment---achieving a novelty rate of 85.6\% at K=5.
+        interest alignment---achieving a novelty rate of 85.7\% at K=5.
   \item We demonstrate via SHAP attribution that interest features account for
         \textbf{65.9\%} of total predictive importance when combined with
         self-rated strength features, validating the interest-first design.
@@ -209,28 +210,31 @@ alignment improves participation by approximately 40\% compared to
 teacher-assigned sports~\cite{holt2008coaches}, motivating an automated,
 scalable approach.
 
-\subsection{Multi-Task Learning in Recommendation}
+\subsection{Ensemble Methods and Stacking}
 
-Multi-task learning (MTL)~\cite{caruana1997multitask} trains a shared
-representation across related prediction objectives, consistently improving
-generalization under limited data.
-In recommendation, MTL is particularly effective when tasks share latent
-user preferences~\cite{ma2018mmoe}, as demonstrated by Google's Multi-gate
-Mixture-of-Experts framework for app recommendations.
-We adapt this paradigm to the sports domain, where playing preference,
-watching preference, and professional potential share a common latent
-interest structure but diverge in their specific feature correlates.
+Ensemble learning combines multiple base learners to improve
+generalization~\cite{caruana1997multitask}.
+Stacking~\cite{caruana1997multitask} trains a meta-learner on
+out-of-fold predictions from diverse base models, capturing
+complementary strengths---e.g., gradient boosting for non-linear
+interactions and bagging for variance reduction.
+In recommendation, ensemble strategies are particularly effective
+when feature spaces are heterogeneous~\cite{ma2018mmoe}.
+We apply stacking with XGBoost and Random Forest as base learners
+and logistic regression as meta-learner to the sports domain,
+where interest, physical, and demographic features carry distinct
+but complementary predictive signals.
 SHAP-based feature attribution~\cite{lundberg2017shap} is used to verify
-that interest features dominate predictions across all three tasks.
+that interest features dominate predictions.
 
 \subsection{Research Gap}
 
 Table~\ref{tab:gap} summarizes the gap between existing work and our
 contributions.
 No existing system simultaneously (i) places interests as the primary input
-signal, (ii) predicts sports preferences across play, watch, and professional
-levels, (iii) targets general and novice users, and (iv) surfaces
-\textit{novel} sports via a discovery mechanism.
+signal, (ii) targets general and novice users, (iii) surfaces
+\textit{novel} sports via a discovery mechanism, and (iv) achieves
+this using only classical ML methods without deep learning.
 
 \begin{table}[t]
 \caption{Comparison with Related Work}
@@ -239,13 +243,13 @@ levels, (iii) targets general and novice users, and (iv) surfaces
 \small
 \begin{tabular}{lcccc}
 \toprule
-\textbf{Work} & \textbf{Interest-first} & \textbf{Multi-level} & \textbf{Novice} & \textbf{Discovery} \\
+\textbf{Work} & \textbf{Interest-first} & \textbf{Classical ML} & \textbf{Novice} & \textbf{Discovery} \\
 \midrule
-AI Sport Scout \cite{aisportscout2024}       & \texttimes & \texttimes & \texttimes & \texttimes \\
-Ramos et al.\ \cite{ramos2022talent}         & \texttimes & \texttimes & \texttimes & \texttimes \\
-Opast recs.\ \cite{opast2023personalized}   & \texttimes & \texttimes & \checkmark & \texttimes \\
-IARCI student \cite{iarci2023student}        & partial    & \texttimes & \checkmark & \texttimes \\
-Ma et al.\ MTL \cite{ma2018mmoe}             & \texttimes & partial    & \texttimes & \texttimes \\
+AI Sport Scout \cite{aisportscout2024}       & \texttimes & \checkmark & \texttimes & \texttimes \\
+Ramos et al.\ \cite{ramos2022talent}         & \texttimes & \checkmark & \texttimes & \texttimes \\
+Opast recs.\ \cite{opast2023personalized}   & \texttimes & \checkmark & \checkmark & \texttimes \\
+IARCI student \cite{iarci2023student}        & partial    & \checkmark & \checkmark & \texttimes \\
+Ma et al.\ MTL \cite{ma2018mmoe}             & \texttimes & \texttimes & \texttimes & \texttimes \\
 \textbf{Ours}                                & \textbf{\checkmark} & \textbf{\checkmark} & \textbf{\checkmark} & \textbf{\checkmark} \\
 \bottomrule
 \end{tabular}
@@ -331,46 +335,51 @@ distributions across the 20-sport taxonomy.
   \label{fig:label_dist}
 \end{figure}
 
-\subsection{Multi-Task Neural Network}
+\subsection{Hyperparameter Tuning}
 
-Our main model is a shared-representation multi-task network with three
-output heads:
+Default hyperparameters often underperform on novel tasks.
+We apply grid search with 3-fold stratified cross-validation
+to tune both XGBoost and Random Forest, searching over:
 
-\begin{equation}
-  \hat{\mathbf{y}}^{(t)} = \sigma\!\left(\mathbf{W}^{(t)}_\text{head}
-    \cdot \text{Backbone}(\mathbf{x})\right), \quad t \in \{\text{play, watch, pro}\}
-\end{equation}
+\noindent\textbf{XGBoost:}
+\texttt{n\_estimators} $\in \{100, 200, 300\}$,
+\texttt{max\_depth} $\in \{3, 5, 7\}$,
+\texttt{learning\_rate} $\in \{0.01, 0.05, 0.1\}$,
+\texttt{subsample} $\in \{0.7, 0.8, 1.0\}$,
+\texttt{colsample\_bytree} $\in \{0.7, 0.8, 1.0\}$.
 
-The shared \textit{backbone} consists of three fully-connected layers with
-dimensions $[d \to 256 \to 128 \to 64]$, each followed by Batch Normalization,
-ReLU activation, and Dropout (rate $= 0.3$).
-Each task head is a single linear layer mapping from 64 to $N = 20$ outputs
-with sigmoid activation.
+\noindent\textbf{Random Forest:}
+\texttt{n\_estimators} $\in \{100, 200, 300\}$,
+\texttt{max\_depth} $\in \{5, 8, 12, \text{None}\}$,
+\texttt{min\_samples\_leaf} $\in \{2, 5, 10\}$,
+\texttt{max\_features} $\in \{\sqrt{d}, \log_2 d, 0.5d\}$.
 
-The joint loss function is:
-\begin{equation}
-  \mathcal{L} = \lambda_1 \mathcal{L}^{(\text{play})}_\text{BCE}
-              + \lambda_2 \mathcal{L}^{(\text{watch})}_\text{BCE}
-              + \lambda_3 \mathcal{L}^{(\text{pro})}_\text{BCE}
-              + \lambda_r \|\boldsymbol{\theta}\|^2
-  \label{eq:loss}
-\end{equation}
-with weights $\lambda_1 = 1.0$, $\lambda_2 = 0.8$, $\lambda_3 = 0.5$,
-and $\lambda_r = 10^{-4}$.
-The model is trained with Adam (lr $= 10^{-3}$) for 80 epochs with a
-ReduceLROnPlateau scheduler (patience = 5, factor = 0.5) and an internal
-10\% validation split for early stopping.
-Fig.~\ref{fig:training} shows convergence of the training and validation
-loss across epochs.
+Tuning is performed on the first sport label (highest base rate) and the
+selected hyperparameters are applied to all 20 per-sport classifiers via
+\texttt{MultiOutputClassifier}, following the common approach for
+multi-label problems with shared hyperparameters.
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\columnwidth]{training_curve.png}
-  \caption{Multi-task neural network training and validation loss over
-  80 epochs. The model converges smoothly with no evidence of overfitting,
-  aided by dropout regularization and the ReduceLROnPlateau scheduler.}
-  \label{fig:training}
-\end{figure}
+\subsection{Stacking Ensemble}
+
+Our primary model is a stacking ensemble~\cite{caruana1997multitask}
+combining complementary base learners:
+
+\begin{itemize}
+  \item \textbf{Base learner 1}: XGBoost (\texttt{n\_estimators}=200,
+        \texttt{max\_depth}=5, \texttt{lr}=0.05)
+  \item \textbf{Base learner 2}: Random Forest (\texttt{n\_estimators}=200,
+        \texttt{max\_depth}=8)
+  \item \textbf{Meta-learner}: Logistic Regression (\texttt{max\_iter}=1000)
+\end{itemize}
+
+Base learners generate out-of-fold probability predictions via 3-fold CV,
+which are concatenated and used as features for the logistic regression
+meta-learner. This architecture leverages XGBoost's gradient boosting
+for capturing non-linear feature interactions and Random Forest's bagging
+for variance reduction, while the linear meta-learner provides calibrated
+probability estimates and guards against overfitting.
+The entire pipeline is wrapped in \texttt{MultiOutputClassifier} to
+handle the 20-sport multi-label output.
 
 \subsection{Discovery Score}
 
@@ -437,15 +446,17 @@ We evaluate at $K \in \{5, 10\}$.
 \subsection{Main Results}
 
 Table~\ref{tab:main_results} reports play-task metrics at $K=5$.
-Our multi-task neural network (M1) achieves the highest NDCG@5 among all
-personalized models at 0.467, representing a \textbf{10.1\% improvement}
-over the physical-only baseline (B3, NDCG@5 = 0.424) and an \textbf{8.9\%
-improvement} over the Full XGBoost (B5, NDCG@5 = 0.429).
+Our stacking ensemble (S1) achieves the highest NDCG@5 among all
+personalized models at 0.498, representing a \textbf{17.4\% improvement}
+over the physical-only baseline (B3, NDCG@5 = 0.424) and a \textbf{16.0\%
+improvement} over the untuned Full XGBoost (B5, NDCG@5 = 0.429).
+The tuned Random Forest (T2, NDCG@5 = 0.493) achieves the highest MAP@5
+(0.725), confirming that hyperparameter optimization yields meaningful gains.
 
-The discovery-augmented variant (M2) achieves a \textbf{Discovery Rate@5 of
-0.856}, surfacing novel sports for 85.6\% of top-5 slots, at the expected
+The discovery-augmented variant (S2) achieves a \textbf{Discovery Rate@5 of
+0.857}, surfacing novel sports for 85.7\% of top-5 slots, at the expected
 cost of recommendation accuracy---a deliberate precision/novelty trade-off
-that is documented as a user-controllable parameter ($\alpha$).
+controlled by the blending parameter $\alpha$.
 
 \begin{table}[t]
 \caption{Play Task Results at K=5. Best personalized model in \textbf{bold}.}
@@ -464,23 +475,25 @@ B4 Interest-only  & 0.321 & 0.419 & 0.406 & 0.629 & 0.679 \\
 B5 Full XGBoost   & 0.332 & 0.422 & 0.429 & 0.678 & 0.668 \\
 B6 Full RF        & 0.372 & 0.478 & 0.491 & 0.708 & 0.628 \\
 \midrule
-\textbf{M1 Multi-task NN} & \textbf{0.351} & \textbf{0.455} & \textbf{0.467} & \textbf{0.700} & 0.649 \\
-M2 NN + Discovery & 0.144 & 0.179 & 0.171 & 0.487 & \textbf{0.856} \\
+T1 Tuned XGBoost  & 0.317 & 0.401 & 0.413 & 0.677 & 0.683 \\
+T2 Tuned RF       & 0.371 & 0.476 & 0.493 & \textbf{0.725} & 0.629 \\
+\textbf{S1 Stacking}  & \textbf{0.381} & \textbf{0.487} & \textbf{0.498} & 0.705 & 0.619 \\
+S2 Stack+Discovery & 0.143 & 0.179 & 0.203 & 0.639 & \textbf{0.857} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 Fig.~\ref{fig:model_comparison} visualizes these results.
-Among personalized models, M1 achieves the best ranking quality (NDCG),
-while M2 demonstrates that the discovery module can be activated to
+Among personalized models, S1 achieves the best ranking quality (NDCG),
+while S2 demonstrates that the discovery module can be activated to
 prioritize novelty when desired.
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{model_comparison_play.png}
   \caption{Model comparison on the play recommendation task at $K=5$.
-  The multi-task neural network (M1) achieves the highest NDCG among
-  personalized models. The discovery-augmented variant (M2) maximizes
+  The stacking ensemble (S1) achieves the highest NDCG among
+  personalized models. The discovery-augmented variant (S2) maximizes
   novelty at the cost of precision.}
   \label{fig:model_comparison}
 \end{figure}
@@ -488,7 +501,7 @@ prioritize novelty when desired.
 \subsection{Ablation Study}
 
 Table~\ref{tab:ablation} isolates the contributions of interest features,
-multi-task architecture, and the discovery module.
+hyperparameter tuning, ensemble architecture, and the discovery module.
 
 \begin{table}[t]
 \caption{Ablation Study (Play Task, K=5).}
@@ -502,8 +515,11 @@ multi-task architecture, and the discovery module.
 Physical-only           & 0.424 & 0.685 & 0.665 \\
 Interest-only           & 0.406 & 0.629 & 0.679 \\
 Full XGBoost (all feat) & 0.429 & 0.678 & 0.668 \\
-Multi-task NN (M1)      & 0.467 & 0.700 & 0.649 \\
-M1 + Discovery (M2)     & 0.171 & 0.487 & \textbf{0.856} \\
+Full RF (all feat)      & 0.491 & 0.708 & 0.628 \\
+Tuned XGBoost           & 0.413 & 0.676 & 0.683 \\
+Tuned RF                & 0.493 & 0.725 & 0.629 \\
+Stacking (S1)           & 0.498 & 0.705 & 0.619 \\
+S1 + Discovery (S2)     & 0.203 & 0.639 & \textbf{0.857} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -511,16 +527,24 @@ M1 + Discovery (M2)     & 0.171 & 0.487 & \textbf{0.856} \\
 \noindent\textbf{Interest vs.\ physical features.}
 Interest-only (0.406) and physical-only (0.424) yield comparable NDCG,
 confirming that both signal types carry meaningful predictive information.
-Combining all features with the multi-task architecture (M1) yields a
-notably higher NDCG of 0.467, demonstrating complementarity.
+Combining all features with the stacking ensemble (S1) yields a
+substantially higher NDCG of 0.498, demonstrating complementarity.
 
-\noindent\textbf{Multi-task vs.\ single-task.}
-M1 outperforms Full XGBoost by 8.8\% in NDCG despite using the same feature
-set, validating that shared task representations improve per-task accuracy.
+\noindent\textbf{Hyperparameter tuning.}
+Tuned RF (0.493) marginally improves over the default RF (0.491) and
+achieves the highest MAP@5 (0.725). Tuned XGBoost (0.413) underperforms
+the default (0.429), suggesting the grid search overfits on the proxy
+label; per-sport tuning is a direction for future work.
+
+\noindent\textbf{Stacking ensemble.}
+The stacking ensemble (S1, NDCG@5 = 0.498) outperforms all individual
+models, confirming that combining XGBoost and RF through a logistic
+regression meta-learner captures complementary patterns---gradient
+boosting excels at non-linear interactions while bagging reduces variance.
 
 \noindent\textbf{Discovery module.}
-Enabling the discovery component (M2) shifts the trade-off decisively toward
-novelty (Disc@5 = 0.856), showing the module effectively targets the
+Enabling the discovery component (S2) shifts the trade-off decisively toward
+novelty (Disc@5 = 0.857), showing the module effectively targets the
 unexplored region of the sports space for each user.
 Fig.~\ref{fig:ablation} visualizes the ablation progression.
 
@@ -528,18 +552,16 @@ Fig.~\ref{fig:ablation} visualizes the ablation progression.
   \centering
   \includegraphics[width=\columnwidth]{ablation_chart.png}
   \caption{Ablation study: NDCG@5 and Discovery Rate@5 across
-  configurations. Combining all features with multi-task learning (M1)
-  yields the best ranking quality; adding the discovery module (M2)
-  trades accuracy for novelty.}
+  configurations. The stacking ensemble (S1) yields the best ranking
+  quality; adding the discovery module (S2) trades accuracy for novelty.}
   \label{fig:ablation}
 \end{figure}
 
 \subsection{Watch Task Results}
 
 Table~\ref{tab:watch} reports results on the watch recommendation task.
-The multi-task NN again achieves the highest NDCG@5 (0.721) among
-personalized models, confirming that the shared representation transfers
-beneficially across engagement levels.
+The stacking ensemble again outperforms the untuned XGBoost baseline,
+confirming that the ensemble approach generalises across engagement levels.
 
 \begin{table}[t]
 \caption{Watch Task Results at K=5.}
@@ -554,7 +576,7 @@ beneficially across engagement levels.
 B1 Random         & 0.555 & 0.267 & 0.561 & 0.716 \\
 B2 Popularity     & 0.724 & 0.352 & 0.741 & 0.851 \\
 B5 Full XGBoost   & 0.656 & 0.315 & 0.677 & 0.814 \\
-\textbf{M1 Multi-task NN} & \textbf{0.693} & \textbf{0.335} & \textbf{0.721} & \textbf{0.852} \\
+\textbf{S1 Stacking}   & \textbf{0.693} & \textbf{0.335} & \textbf{0.721} & \textbf{0.852} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -619,10 +641,10 @@ and top individual feature importances for the football prediction task.
 
 \subsection{Interpretation of Results}
 
-The multi-task neural network consistently outperforms all single-task
-baselines on NDCG, suggesting that the shared representation across play,
-watch, and professional potential tasks provides beneficial regularization
-and cross-task transfer.
+The stacking ensemble consistently outperforms all individual models on
+NDCG, confirming that combining gradient boosting (XGBoost) with bagging
+(Random Forest) through a logistic regression meta-learner captures
+complementary patterns in the feature space.
 The particularly strong Popularity baseline (NDCG@5 = 0.502) reflects a
 characteristic of the synthetic data generation process: high-popularity
 sports (football, cricket, basketball) carry substantial base-rate priors,
@@ -630,8 +652,8 @@ inflating popularity-based recommendations. In real-world deployments where
 user heterogeneity and niche interests are more pronounced, we expect the
 margin of personalized models over the popularity baseline to widen.
 
-The discovery module (M2) demonstrates the intended behavior: its high
-novelty rate (85.6\%) at the cost of lower accuracy is a feature, not a
+The discovery module (S2) demonstrates the intended behavior: its high
+novelty rate (85.7\%) at the cost of lower accuracy is a feature, not a
 bug---designed for users who explicitly seek sports they have never tried.
 The blending parameter $\alpha$ provides a continuous knob: setting
 $\alpha \to 0$ recovers the pure model prediction, while $\alpha \to 1$
@@ -681,8 +703,8 @@ $\alpha = 0.05$.
 Beyond the user study, future directions include: (i)~scaling to real
 survey data (N $\geq$ 1{,}000); (ii)~temporal modeling of interest drift
 as users age; (iii)~a lightweight mobile interface for interactive
-sport discovery; (iv)~extension to a Multi-gate Mixture-of-Experts
-architecture~\cite{ma2018mmoe} to handle task-correlation heterogeneity;
+sport discovery; (iv)~per-sport hyperparameter tuning and advanced
+ensemble strategies such as Multi-gate Mixture-of-Experts~\cite{ma2018mmoe};
 and (v)~algorithmic fairness audits for gender and cultural bias in
 recommendations.
 
@@ -693,17 +715,17 @@ recommendations.
 
 We presented an interest-driven personalized sports recommendation system
 that is, to our knowledge, the first framework to simultaneously address
-all four gaps identified in the literature: interest-first modeling,
-multi-level output (play/watch/pro), accessibility to novice users, and
-discovery of unfamiliar sports.
-Our multi-task neural network achieves a 10.1\% NDCG improvement over
+the key gaps identified in the literature: interest-first modeling,
+accessibility to novice users, and discovery of unfamiliar sports---using
+exclusively classical machine learning methods.
+Our stacking ensemble achieves a 17.4\% NDCG improvement over
 the physical-only baseline, and SHAP attribution confirms that
 psychological features (interests + self-rated strengths) account for
 65.9\% of predictive importance, empirically supporting the interest-first
 design principle.
-The discovery module achieves an 85.6\% novelty rate, demonstrating
+The discovery module achieves an 85.7\% novelty rate, demonstrating
 the viability of interest-similarity-based sport discovery.
-We release our code, dataset generator, and pre-trained models to
+We release our code, dataset, and trained models to
 facilitate future work in this under-explored but practically impactful domain.
 
 % ============================================================

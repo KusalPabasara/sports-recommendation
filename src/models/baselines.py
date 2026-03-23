@@ -15,7 +15,9 @@ All expose a common interface:
 """
 
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, StackingClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import GridSearchCV, StratifiedKFold
 from sklearn.multioutput import MultiOutputClassifier
 from xgboost import XGBClassifier
 
@@ -172,6 +174,148 @@ class FullRandomForest:
         )
 
     def fit(self, X: np.ndarray, y: np.ndarray) -> "FullRandomForest":
+        self.model.fit(X, y)
+        return self
+
+    def predict_scores(self, X: np.ndarray) -> np.ndarray:
+        proba_list = self.model.predict_proba(X)
+        return np.column_stack([p[:, 1] for p in proba_list])
+
+
+class TunedXGBoost:
+    """
+    XGBoost with GridSearchCV hyperparameter tuning.
+    Tunes on the first sport label via cross-validated grid search,
+    then applies best params to all 20 sports via MultiOutputClassifier.
+    """
+
+    def __init__(self, cv: int = 3, verbose: int = 0) -> None:
+        self.cv = cv
+        self.verbose = verbose
+        self.best_params_ = {}
+        self.model = None
+
+    def fit(self, X: np.ndarray, y: np.ndarray) -> "TunedXGBoost":
+        param_grid = {
+            "n_estimators": [100, 200, 300],
+            "max_depth": [3, 5, 7],
+            "learning_rate": [0.01, 0.05, 0.1],
+            "subsample": [0.7, 0.8, 1.0],
+            "colsample_bytree": [0.7, 0.8, 1.0],
+        }
+        y_tune = y[:, 0] if y.ndim == 2 else y
+        base = XGBClassifier(
+            use_label_encoder=False,
+            eval_metric="logloss",
+            random_state=RANDOM_STATE,
+            verbosity=0,
+        )
+        gs = GridSearchCV(
+            base, param_grid,
+            scoring="roc_auc",
+            cv=StratifiedKFold(n_splits=self.cv, shuffle=True, random_state=RANDOM_STATE),
+            n_jobs=-1,
+            verbose=self.verbose,
+            refit=False,
+        )
+        gs.fit(X, y_tune)
+        self.best_params_ = gs.best_params_
+        if self.verbose:
+            print(f"  Best XGB params: {self.best_params_}")
+
+        best_xgb = XGBClassifier(
+            **self.best_params_,
+            use_label_encoder=False,
+            eval_metric="logloss",
+            random_state=RANDOM_STATE,
+            verbosity=0,
+        )
+        self.model = MultiOutputClassifier(best_xgb, n_jobs=-1)
+        self.model.fit(X, y)
+        return self
+
+    def predict_scores(self, X: np.ndarray) -> np.ndarray:
+        proba_list = self.model.predict_proba(X)
+        return np.column_stack([p[:, 1] for p in proba_list])
+
+
+class TunedRandomForest:
+    """
+    Random Forest with GridSearchCV hyperparameter tuning.
+    """
+
+    def __init__(self, cv: int = 3, verbose: int = 0) -> None:
+        self.cv = cv
+        self.verbose = verbose
+        self.best_params_ = {}
+        self.model = None
+
+    def fit(self, X: np.ndarray, y: np.ndarray) -> "TunedRandomForest":
+        param_grid = {
+            "n_estimators": [100, 200, 300],
+            "max_depth": [5, 8, 12, None],
+            "min_samples_leaf": [2, 5, 10],
+            "max_features": ["sqrt", "log2", 0.5],
+        }
+        y_tune = y[:, 0] if y.ndim == 2 else y
+        base = RandomForestClassifier(random_state=RANDOM_STATE)
+        gs = GridSearchCV(
+            base, param_grid,
+            scoring="roc_auc",
+            cv=StratifiedKFold(n_splits=self.cv, shuffle=True, random_state=RANDOM_STATE),
+            n_jobs=-1,
+            verbose=self.verbose,
+            refit=False,
+        )
+        gs.fit(X, y_tune)
+        self.best_params_ = gs.best_params_
+        if self.verbose:
+            print(f"  Best RF params: {self.best_params_}")
+
+        best_rf = RandomForestClassifier(
+            **self.best_params_,
+            random_state=RANDOM_STATE,
+            n_jobs=-1,
+        )
+        self.model = MultiOutputClassifier(best_rf, n_jobs=-1)
+        self.model.fit(X, y)
+        return self
+
+    def predict_scores(self, X: np.ndarray) -> np.ndarray:
+        proba_list = self.model.predict_proba(X)
+        return np.column_stack([p[:, 1] for p in proba_list])
+
+
+class StackingEnsemble:
+    """
+    Stacking ensemble: XGBoost + Random Forest as base learners,
+    Logistic Regression as meta-learner.
+    Classical ML ensemble — no neural networks.
+    """
+
+    def __init__(self, cv: int = 3) -> None:
+        self.cv = cv
+        self.model = None
+
+    def fit(self, X: np.ndarray, y: np.ndarray) -> "StackingEnsemble":
+        xgb = XGBClassifier(
+            n_estimators=200, max_depth=5, learning_rate=0.05,
+            subsample=0.8, colsample_bytree=0.8,
+            use_label_encoder=False, eval_metric="logloss",
+            random_state=RANDOM_STATE, verbosity=0,
+        )
+        rf = RandomForestClassifier(
+            n_estimators=200, max_depth=8,
+            min_samples_leaf=5, random_state=RANDOM_STATE, n_jobs=-1,
+        )
+        stack = StackingClassifier(
+            estimators=[("xgb", xgb), ("rf", rf)],
+            final_estimator=LogisticRegression(max_iter=1000, random_state=RANDOM_STATE),
+            cv=self.cv,
+            stack_method="predict_proba",
+            n_jobs=-1,
+        )
+        self.model = MultiOutputClassifier(stack, n_jobs=-1)
         self.model.fit(X, y)
         return self
 
