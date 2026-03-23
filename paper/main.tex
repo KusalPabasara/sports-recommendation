@@ -12,16 +12,16 @@
 \usepackage{multirow}
 \usepackage{url}
 \usepackage{hyperref}
-\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+\hypersetup{colorlinks=true, linkcolor=black, citecolor=black, urlcolor=blue}
 
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 
 \begin{document}
 
-\title{Interest-Driven Personalized Sports Recommendation:\\
-A Multi-Task Learning Approach for Playing, Watching,\\
-and Professional Potential Prediction}
+\title{Interest-Driven Personalized Sports Recommendation\\
+Using Classical Ensemble Learning with a\\
+Novel-Sport Discovery Mechanism}
 
 \author{
   \IEEEauthorblockN{Wandawa Gamage Kusal Pabasara}
@@ -61,7 +61,7 @@ SHAP attribution confirms that interest features account for 35.4\% of
 predictive importance individually, and 65.9\% when combined with
 self-rated strength features---collectively outweighing objective physical
 metrics.
-The discovery module achieves an 85.7\% novelty rate at K=5.
+The discovery module achieves an 85.7\% novelty rate at $K{=}5$.
 To our knowledge, this is the first unified framework that is simultaneously
 interest-first, targets general and novice users, and is equipped with a
 novel-sport discovery mechanism---using only classical ML methods.
@@ -116,7 +116,7 @@ We make the following contributions:
         using exclusively classical ML methods.
   \item We introduce a \textbf{discovery score}, a cosine-similarity metric
         that surfaces sports the user has never encountered, ranked by latent
-        interest alignment---achieving a novelty rate of 85.7\% at K=5.
+        interest alignment---achieving a novelty rate of 85.7\% at $K{=}5$.
   \item We demonstrate via SHAP attribution that interest features account for
         \textbf{65.9\%} of total predictive importance when combined with
         self-rated strength features, validating the interest-first design.
@@ -171,8 +171,8 @@ characteristics.
 Closest to our work, personalized physical activity recommendation systems
 have shown that tailored suggestions increase adherence by up to 23\% over
 generic advice~\cite{opast2023personalized}; however, these systems use
-physical metrics as the primary signal and do not model watching or
-professional potential, nor do they guide users toward unfamiliar sports.
+physical metrics as the primary signal and do not guide users toward
+unfamiliar sports.
 
 \subsection{Psychological Factors in Sports Participation}
 
@@ -203,8 +203,7 @@ on small survey samples~\cite{iarci2023student}, achieving approximately
 78\% accuracy in classifying a single preferred sport from three to five
 options.
 However, this approach does not generalize to multi-label recommendation
-across a broad sports taxonomy, does not model watching or professional
-potential, and introduces no discovery mechanism.
+across a broad sports taxonomy and introduces no discovery mechanism.
 Qualitative evidence from physical education settings suggests that interest
 alignment improves participation by approximately 40\% compared to
 teacher-assigned sports~\cite{holt2008coaches}, motivating an automated,
@@ -213,13 +212,13 @@ scalable approach.
 \subsection{Ensemble Methods and Stacking}
 
 Ensemble learning combines multiple base learners to improve
-generalization~\cite{caruana1997multitask}.
-Stacking~\cite{caruana1997multitask} trains a meta-learner on
+generalization~\cite{breiman2001random}.
+Stacking~\cite{wolpert1992stacked} trains a meta-learner on
 out-of-fold predictions from diverse base models, capturing
 complementary strengths---e.g., gradient boosting for non-linear
 interactions and bagging for variance reduction.
 In recommendation, ensemble strategies are particularly effective
-when feature spaces are heterogeneous~\cite{ma2018mmoe}.
+when feature spaces are heterogeneous~\cite{breiman2001random}.
 We apply stacking with XGBoost and Random Forest as base learners
 and logistic regression as meta-learner to the sports domain,
 where interest, physical, and demographic features carry distinct
@@ -265,10 +264,11 @@ Ma et al.\ MTL \cite{ma2018mmoe}             & \texttimes & \texttimes & \textti
 Let a user $u$ be represented by a feature vector $\mathbf{x}_u \in \mathbb{R}^d$
 comprising interest, strength, physical, and demographic features.
 Let $\mathcal{S} = \{s_1, \ldots, s_N\}$ denote the sports taxonomy of $N = 20$ sports.
-We define three binary label vectors per user:
-$\mathbf{y}^{(\text{play})}, \mathbf{y}^{(\text{watch})}, \mathbf{y}^{(\text{pro})} \in \{0,1\}^N$.
-The goal is to learn a function $f: \mathbb{R}^d \to [0,1]^{3N}$ that jointly
-predicts the probability of engagement with each sport at each level.
+We define two binary label vectors per user:
+$\mathbf{y}^{(\text{play})}, \mathbf{y}^{(\text{watch})} \in \{0,1\}^N$,
+representing active participation and spectator interest respectively.
+The goal is to learn a function $f: \mathbb{R}^d \to [0,1]^{N}$ per task that
+predicts the probability of engagement with each sport.
 
 \subsection{Dataset Construction}
 
@@ -335,6 +335,16 @@ distributions across the 20-sport taxonomy.
   \label{fig:label_dist}
 \end{figure}
 
+\subsection{Preprocessing}
+
+Continuous features (age, height, weight, BMI, sprint, jump) are standardized
+using $z$-score normalization fitted on training data only.
+Categorical features (gender, region) are integer-encoded.
+Likert features are kept as ordinal integers.
+The dataset is split 80/20 (train/test) with stratification on the
+number of sports played (binned: low $\leq 2$, mid 3--5, high $\geq 6$),
+giving 800 training and 200 test users.
+
 \subsection{Hyperparameter Tuning}
 
 Default hyperparameters often underperform on novel tasks.
@@ -361,7 +371,7 @@ multi-label problems with shared hyperparameters.
 
 \subsection{Stacking Ensemble}
 
-Our primary model is a stacking ensemble~\cite{caruana1997multitask}
+Our primary model is a stacking ensemble~\cite{wolpert1992stacked}
 combining complementary base learners:
 
 \begin{itemize}
@@ -405,16 +415,6 @@ The final blended score combines model prediction with discovery:
 \end{equation}
 where $\tilde{\cdot}$ denotes per-user $[0,1]$ normalization and $\alpha = 0.4$.
 
-\subsection{Preprocessing}
-
-Continuous features (age, height, weight, BMI, sprint, jump) are standardized
-using $z$-score normalization fitted on training data only.
-Categorical features (gender, region) are integer-encoded.
-Likert features are kept as ordinal integers.
-The dataset is split 80/20 (train/test) with stratification on the
-number of sports played (binned: low $\leq 2$, mid 3--5, high $\geq 6$),
-giving 800 training and 200 test users.
-
 % ============================================================
 \section{Experiments}
 \label{sec:experiments}
@@ -441,7 +441,7 @@ We compare against six baselines spanning the relevant design space:
 We report Precision@K, Recall@K, F1@K, NDCG@K, MAP@K (all standard
 recommendation metrics), and a novel \textit{Discovery Rate@K}: the fraction
 of top-$K$ recommendations that are sports the user has not previously tried.
-We evaluate at $K \in \{5, 10\}$.
+We evaluate at $K \in \{5,\, 10\}$.
 
 \subsection{Main Results}
 
@@ -459,7 +459,7 @@ cost of recommendation accuracy---a deliberate precision/novelty trade-off
 controlled by the blending parameter $\alpha$.
 
 \begin{table}[t]
-\caption{Play Task Results at K=5. Best personalized model in \textbf{bold}.}
+\caption{Play Task Results at $K{=}5$. Best personalized model in \textbf{bold}.}
 \label{tab:main_results}
 \centering
 \small
@@ -504,7 +504,7 @@ Table~\ref{tab:ablation} isolates the contributions of interest features,
 hyperparameter tuning, ensemble architecture, and the discovery module.
 
 \begin{table}[t]
-\caption{Ablation Study (Play Task, K=5).}
+\caption{Ablation Study (Play Task, $K{=}5$).}
 \label{tab:ablation}
 \centering
 \small
@@ -561,10 +561,10 @@ Fig.~\ref{fig:ablation} visualizes the ablation progression.
 
 Table~\ref{tab:watch} reports results on the watch recommendation task.
 The stacking ensemble again outperforms the untuned XGBoost baseline,
-confirming that the ensemble approach generalises across engagement levels.
+confirming that the ensemble approach generalizes across engagement levels.
 
 \begin{table}[t]
-\caption{Watch Task Results at K=5.}
+\caption{Watch Task Results at $K{=}5$.}
 \label{tab:watch}
 \centering
 \small
@@ -653,8 +653,8 @@ user heterogeneity and niche interests are more pronounced, we expect the
 margin of personalized models over the popularity baseline to widen.
 
 The discovery module (S2) demonstrates the intended behavior: its high
-novelty rate (85.7\%) at the cost of lower accuracy is a feature, not a
-bug---designed for users who explicitly seek sports they have never tried.
+novelty rate (85.7\%) at the cost of lower accuracy is by design---the
+module serves users who explicitly seek sports they have never tried.
 The blending parameter $\alpha$ provides a continuous knob: setting
 $\alpha \to 0$ recovers the pure model prediction, while $\alpha \to 1$
 maximizes discovery. Future deployments could adapt $\alpha$ per user based
@@ -696,7 +696,7 @@ Primary outcome: sports engagement intention score (1--10) at two-week
 follow-up. Secondary outcomes: perceived recommendation quality,
 willingness to try a new sport, discovery satisfaction.
 Target sample: $N = 60$ (30 per arm), statistical power $= 0.80$,
-$\alpha = 0.05$.
+significance level $p < 0.05$.
 
 \subsection{Future Work}
 
