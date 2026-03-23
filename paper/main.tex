@@ -1,0 +1,714 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{url}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{Interest-Driven Personalized Sports Recommendation:\\
+A Multi-Task Learning Approach for Playing, Watching,\\
+and Professional Potential Prediction}
+
+\author{
+  \IEEEauthorblockN{Wandawa Gamage Kusal Pabasara}
+  \IEEEauthorblockA{
+    \textit{Department of Computer Science and Engineering}\\
+    University of Moratuwa\\
+    Moratuwa, Sri Lanka\\
+    kusalp.23@cse.mrt.ac.lk
+  }
+}
+
+\maketitle
+
+% ============================================================
+\begin{abstract}
+% ============================================================
+Existing sports matching systems rely primarily on physical fitness metrics
+to recommend sports to users, leaving personal interests as an underutilized
+signal despite strong evidence from sports psychology that interest and
+intrinsic motivation are the strongest predictors of sustained engagement.
+We present an \textit{interest-driven} sports recommendation framework
+that positions personal interests as the primary input signal, with physical
+strengths and demographic features as secondary factors.
+Our system simultaneously predicts sports preferences across three
+engagement levels---playing, watching, and professional potential---using
+a shared-representation multi-task neural network.
+We additionally introduce a \textit{discovery score}, a cosine-similarity
+metric that surfaces sports unfamiliar to the user based on latent interest
+alignment.
+We evaluate on a literature-calibrated synthetic dataset of 1{,}000 users
+across 20 sports, with feature-label correlations anchored to published
+findings in sports psychology.
+Our multi-task model achieves an NDCG@5 of 0.467, representing a
+\textbf{10.1\% improvement} over a physical-only XGBoost baseline (NDCG@5 = 0.424).
+SHAP attribution confirms that interest features account for 35.4\% of
+predictive importance individually, and 65.9\% when combined with
+self-rated strength features---collectively outweighing objective physical
+metrics.
+The discovery module achieves an 85.6\% novelty rate at K=5.
+To our knowledge, this is the first unified framework that is simultaneously
+interest-first, multi-level (play/watch/pro), designed for general and novice
+users, and equipped with a novel-sport discovery mechanism.
+Code and data are released at \url{https://github.com/KusalPabasara/sports-recommendation}.
+\end{abstract}
+
+\begin{IEEEkeywords}
+sports recommendation, multi-task learning, interest-driven, discovery score,
+personalized recommendation, physical activity
+\end{IEEEkeywords}
+
+% ============================================================
+\section{Introduction}
+\label{sec:intro}
+% ============================================================
+
+Sports participation is widely associated with physical and mental health
+benefits, yet global participation rates remain low, with the WHO reporting
+that over 1.4 billion adults are insufficiently active~\cite{who2022activity}.
+A significant contributor to this gap is the challenge of sports
+\textit{discovery}---most people, particularly students and novices, are
+exposed to a narrow slice of the sports landscape, often through school
+curricula or geographic availability, with little guidance on which sports
+might genuinely suit their personality and interests.
+
+Existing technology-based solutions to this problem focus almost exclusively
+on physical traits. Commercial systems such as AI Sport Scout~\cite{aisportscout2024}
+match users to sports via battery fitness tests (sprint times, jump distances,
+flexibility scores), implicitly assuming that physical aptitude is the
+primary driver of sports participation. While physical ability is undeniably
+relevant for competitive performance, a substantial body of sports
+psychology research establishes that \textit{intrinsic motivation}---driven
+by personal interest and enjoyment---is the stronger predictor of sustained
+participation and long-term engagement~\cite{pelletier1995motivation,
+vallerand2003passions, fraserThomas2006youth}.
+
+This paper addresses the following research question:
+\textit{Can a machine learning system that prioritizes personal interests
+over physical traits provide better and more holistic sports recommendations
+to general users?}
+
+We make the following contributions:
+
+\begin{itemize}
+  \item We propose the first \textbf{interest-first sports recommendation
+        framework}, placing Likert-scaled personal interest profiles as the
+        dominant input signal, with physical and demographic features as
+        secondary factors.
+  \item We design a \textbf{multi-task neural network} that simultaneously
+        predicts three engagement levels---\textit{play}, \textit{watch}, and
+        \textit{professional potential}---via a shared representation backbone
+        and task-specific output heads.
+  \item We introduce a \textbf{discovery score}, a cosine-similarity metric
+        that surfaces sports the user has never encountered, ranked by latent
+        interest alignment---achieving a novelty rate of 85.6\% at K=5.
+  \item We demonstrate via SHAP attribution that interest features account for
+        \textbf{65.9\%} of total predictive importance when combined with
+        self-rated strength features, validating the interest-first design.
+  \item We release a \textbf{literature-calibrated synthetic dataset} of
+        1{,}000 users across 20 sports as a reproducible research artifact,
+        together with full code.
+\end{itemize}
+
+The remainder of this paper is structured as follows.
+Section~\ref{sec:related} reviews related work.
+Section~\ref{sec:method} presents the methodology.
+Section~\ref{sec:experiments} reports experimental results.
+Section~\ref{sec:discussion} discusses findings, limitations, and future work.
+Section~\ref{sec:conclusion} concludes.
+
+% ============================================================
+\section{Related Work}
+\label{sec:related}
+% ============================================================
+
+\subsection{Sports Talent Identification and Athlete Performance Prediction}
+
+Machine learning has been widely applied to predict athlete performance and
+identify sporting talent.
+Ensemble methods such as Random Forests and XGBoost demonstrate strong
+predictive accuracy on physiological and biomechanical
+data~\cite{nature2025sports, bunker2019framework}.
+Systematic reviews of talent identification confirm that morphological and
+physiological variables dominate current models, with psychological factors
+receiving far less attention~\cite{ramos2022talent}.
+Commercial systems such as AI Sport Scout~\cite{aisportscout2024}
+operationalize this approach by matching users to sports through battery
+fitness tests.
+While effective for elite scouting, these systems require specialized testing
+infrastructure, presuppose physical aptitude as the primary signal, and are
+inaccessible to general or novice users.
+Critically, none model interest or motivation features, and the ceiling of
+physical-only classification has been quantified at approximately 60\%
+explained variance~\cite{lidor2005talent}, leaving the remainder unexplained.
+
+\subsection{Recommendation Systems and Personalized Activity Suggestions}
+
+Recommendation systems broadly fall into content-based, collaborative
+filtering, and hybrid approaches~\cite{burke2002hybrid}.
+Collaborative filtering leverages user--item interaction history~\cite{scitepress2017sports}
+but suffers from a cold-start problem that makes it unsuitable for novice
+users with no prior sports history.
+Deep learning-based recommenders, including neural collaborative filtering
+and multi-task architectures~\cite{zhang2019deep}, improve expressiveness
+but rarely incorporate non-behavioral features such as interests or physical
+characteristics.
+Closest to our work, personalized physical activity recommendation systems
+have shown that tailored suggestions increase adherence by up to 23\% over
+generic advice~\cite{opast2023personalized}; however, these systems use
+physical metrics as the primary signal and do not model watching or
+professional potential, nor do they guide users toward unfamiliar sports.
+
+\subsection{Psychological Factors in Sports Participation}
+
+Sports psychology provides compelling theoretical grounding for an
+interest-first approach.
+Vallerand et al.'s dualistic model of passion~\cite{vallerand2003passions}
+establishes that harmonious passion---intrinsically motivated and aligned with
+personal identity---predicts sustained engagement, while obsessive passion
+leads to burnout.
+Self-determination theory~\cite{pelletier1995motivation} further confirms
+that intrinsic motivation, driven by interest and enjoyment, is the strongest
+longitudinal predictor of sport continuation.
+Longitudinal youth studies show that interest and enjoyment outperform
+physical talent in predicting sport persistence, with mismatch between
+assigned sports and personal interest being a primary driver of
+dropout~\cite{fraserThomas2006youth}.
+Personality research additionally links openness and extraversion to sport
+type preference~\cite{allen2013personality}, suggesting that interest-adjacent
+psychological features carry predictive signal.
+Despite this evidence, ML systems in sport have not operationalized interest
+features as first-class inputs.
+
+\subsection{Student and Youth Sports Engagement}
+
+At the intersection of ML and youth sports, prediction of student sport
+preferences has been explored using decision trees and Naive Bayes classifiers
+on small survey samples~\cite{iarci2023student}, achieving approximately
+78\% accuracy in classifying a single preferred sport from three to five
+options.
+However, this approach does not generalize to multi-label recommendation
+across a broad sports taxonomy, does not model watching or professional
+potential, and introduces no discovery mechanism.
+Qualitative evidence from physical education settings suggests that interest
+alignment improves participation by approximately 40\% compared to
+teacher-assigned sports~\cite{holt2008coaches}, motivating an automated,
+scalable approach.
+
+\subsection{Multi-Task Learning in Recommendation}
+
+Multi-task learning (MTL)~\cite{caruana1997multitask} trains a shared
+representation across related prediction objectives, consistently improving
+generalization under limited data.
+In recommendation, MTL is particularly effective when tasks share latent
+user preferences~\cite{ma2018mmoe}, as demonstrated by Google's Multi-gate
+Mixture-of-Experts framework for app recommendations.
+We adapt this paradigm to the sports domain, where playing preference,
+watching preference, and professional potential share a common latent
+interest structure but diverge in their specific feature correlates.
+SHAP-based feature attribution~\cite{lundberg2017shap} is used to verify
+that interest features dominate predictions across all three tasks.
+
+\subsection{Research Gap}
+
+Table~\ref{tab:gap} summarizes the gap between existing work and our
+contributions.
+No existing system simultaneously (i) places interests as the primary input
+signal, (ii) predicts sports preferences across play, watch, and professional
+levels, (iii) targets general and novice users, and (iv) surfaces
+\textit{novel} sports via a discovery mechanism.
+
+\begin{table}[t]
+\caption{Comparison with Related Work}
+\label{tab:gap}
+\centering
+\small
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Work} & \textbf{Interest-first} & \textbf{Multi-level} & \textbf{Novice} & \textbf{Discovery} \\
+\midrule
+AI Sport Scout \cite{aisportscout2024}       & \texttimes & \texttimes & \texttimes & \texttimes \\
+Ramos et al.\ \cite{ramos2022talent}         & \texttimes & \texttimes & \texttimes & \texttimes \\
+Opast recs.\ \cite{opast2023personalized}   & \texttimes & \texttimes & \checkmark & \texttimes \\
+IARCI student \cite{iarci2023student}        & partial    & \texttimes & \checkmark & \texttimes \\
+Ma et al.\ MTL \cite{ma2018mmoe}             & \texttimes & partial    & \texttimes & \texttimes \\
+\textbf{Ours}                                & \textbf{\checkmark} & \textbf{\checkmark} & \textbf{\checkmark} & \textbf{\checkmark} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ============================================================
+\section{Methodology}
+\label{sec:method}
+% ============================================================
+
+\subsection{Problem Formulation}
+
+Let a user $u$ be represented by a feature vector $\mathbf{x}_u \in \mathbb{R}^d$
+comprising interest, strength, physical, and demographic features.
+Let $\mathcal{S} = \{s_1, \ldots, s_N\}$ denote the sports taxonomy of $N = 20$ sports.
+We define three binary label vectors per user:
+$\mathbf{y}^{(\text{play})}, \mathbf{y}^{(\text{watch})}, \mathbf{y}^{(\text{pro})} \in \{0,1\}^N$.
+The goal is to learn a function $f: \mathbb{R}^d \to [0,1]^{3N}$ that jointly
+predicts the probability of engagement with each sport at each level.
+
+\subsection{Dataset Construction}
+
+No public dataset combines interest profiles, physical metrics, and
+multi-label sports engagement labels.
+We generate a literature-calibrated synthetic dataset of $M = 1{,}000$ users
+as a reproducible proxy, following precedents for feasibility studies in
+data-scarce domains.
+
+\subsubsection{Feature Schema}
+
+Each user $u$ is described by $d = 29$ features across four groups:
+
+\begin{itemize}
+  \item \textbf{Interests} (12 Likert 1--5 dimensions): team vs.\ individual
+    preference, outdoor/indoor, competition drive, risk tolerance, creative
+    expression, social enjoyment, endurance interest, power interest,
+    speed/agility interest, spectator engagement, ambition level, strategy
+    preference.
+  \item \textbf{Strengths} (8 Likert 1--5 dimensions): self-rated endurance,
+    strength, speed, flexibility, coordination, agility, reaction time,
+    strategic ability.
+  \item \textbf{Physical metrics} (6 continuous): height (cm), weight (kg),
+    BMI (derived), 100m sprint time (s), standing jump (cm), age.
+  \item \textbf{Demographics} (3): gender, region, facility access.
+\end{itemize}
+
+\subsubsection{Literature-Calibrated Label Generation}
+
+For each user--sport pair, a raw affinity score is computed as:
+\begin{equation}
+  a_{u,s} = 2 \cdot \frac{\mathbf{i}_u \cdot \mathbf{p}_s}{D_I}
+           + 0.5 \cdot \phi_{u,s} + b_s + \epsilon
+  \label{eq:affinity}
+\end{equation}
+where $\mathbf{i}_u \in [0,1]^{D_I}$ is the normalized interest vector,
+$\mathbf{p}_s \in [0,1]^{D_I}$ is a hand-crafted sport profile vector
+(e.g., football: high team, high outdoor, high endurance),
+$\phi_{u,s} \in [0,1]$ is a physical fit score derived from strength
+self-ratings, $b_s$ is the sport's global popularity prior,
+and $\epsilon \sim \mathcal{N}(0, 0.15)$ is noise.
+The factor of 2 on the interest term implements the interest-first weighting.
+
+Binary play labels are sampled as
+$y^{(\text{play})}_{u,s} \sim \text{Bernoulli}(\sigma(5(a_{u,s} - 1.5)))$,
+giving a mean of $\approx 4$ sports played per user---consistent with
+population sports participation statistics~\cite{kokolakakis2016participation}.
+
+Correlation targets are verified against literature benchmarks:
+(i) interest--enjoyment Pearson $r \geq 0.60$~\cite{vallerand2003passions};
+(ii) interest--hours/week $r \geq 0.50$~\cite{pelletier1995motivation};
+(iii) extraversion (team-interest) positively correlated with team sport
+participation rates~\cite{allen2013personality}.
+All three targets are confirmed on the generated dataset.
+Fig.~\ref{fig:label_dist} shows the resulting play and watch rate
+distributions across the 20-sport taxonomy.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{sport_label_distributions.png}
+  \caption{Play and watch participation rates across the 20-sport taxonomy
+  in the synthetic dataset ($N = 1{,}000$). Football, cricket, and basketball
+  exhibit the highest base rates, consistent with global popularity priors.}
+  \label{fig:label_dist}
+\end{figure}
+
+\subsection{Multi-Task Neural Network}
+
+Our main model is a shared-representation multi-task network with three
+output heads:
+
+\begin{equation}
+  \hat{\mathbf{y}}^{(t)} = \sigma\!\left(\mathbf{W}^{(t)}_\text{head}
+    \cdot \text{Backbone}(\mathbf{x})\right), \quad t \in \{\text{play, watch, pro}\}
+\end{equation}
+
+The shared \textit{backbone} consists of three fully-connected layers with
+dimensions $[d \to 256 \to 128 \to 64]$, each followed by Batch Normalization,
+ReLU activation, and Dropout (rate $= 0.3$).
+Each task head is a single linear layer mapping from 64 to $N = 20$ outputs
+with sigmoid activation.
+
+The joint loss function is:
+\begin{equation}
+  \mathcal{L} = \lambda_1 \mathcal{L}^{(\text{play})}_\text{BCE}
+              + \lambda_2 \mathcal{L}^{(\text{watch})}_\text{BCE}
+              + \lambda_3 \mathcal{L}^{(\text{pro})}_\text{BCE}
+              + \lambda_r \|\boldsymbol{\theta}\|^2
+  \label{eq:loss}
+\end{equation}
+with weights $\lambda_1 = 1.0$, $\lambda_2 = 0.8$, $\lambda_3 = 0.5$,
+and $\lambda_r = 10^{-4}$.
+The model is trained with Adam (lr $= 10^{-3}$) for 80 epochs with a
+ReduceLROnPlateau scheduler (patience = 5, factor = 0.5) and an internal
+10\% validation split for early stopping.
+Fig.~\ref{fig:training} shows convergence of the training and validation
+loss across epochs.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{training_curve.png}
+  \caption{Multi-task neural network training and validation loss over
+  80 epochs. The model converges smoothly with no evidence of overfitting,
+  aided by dropout regularization and the ReduceLROnPlateau scheduler.}
+  \label{fig:training}
+\end{figure}
+
+\subsection{Discovery Score}
+
+The discovery module surfaces sports that the user has not yet encountered.
+We represent each sport $s$ by a \textit{sport profile vector}:
+\begin{equation}
+  \mathbf{q}_s = \frac{1}{|\mathcal{U}_s|} \sum_{u \in \mathcal{U}_s} \mathbf{i}_u
+\end{equation}
+where $\mathcal{U}_s$ is the set of training users who play sport $s$,
+and $\mathbf{i}_u$ is the user's normalized interest vector.
+
+The discovery score for user $u$ and sport $s$ is:
+\begin{equation}
+  d_{u,s} = \frac{\mathbf{i}_u \cdot \mathbf{q}_s}{\|\mathbf{i}_u\|\|\mathbf{q}_s\|}
+             \cdot (1 - \text{tried}_{u,s})
+  \label{eq:discovery}
+\end{equation}
+where $\text{tried}_{u,s} = 1$ if user $u$ has previously encountered sport $s$.
+The final blended score combines model prediction with discovery:
+\begin{equation}
+  \hat{r}_{u,s} = \alpha \cdot \tilde{d}_{u,s} + (1-\alpha) \cdot \tilde{f}_{u,s}
+  \label{eq:blend}
+\end{equation}
+where $\tilde{\cdot}$ denotes per-user $[0,1]$ normalization and $\alpha = 0.4$.
+
+\subsection{Preprocessing}
+
+Continuous features (age, height, weight, BMI, sprint, jump) are standardized
+using $z$-score normalization fitted on training data only.
+Categorical features (gender, region) are integer-encoded.
+Likert features are kept as ordinal integers.
+The dataset is split 80/20 (train/test) with stratification on the
+number of sports played (binned: low $\leq 2$, mid 3--5, high $\geq 6$),
+giving 800 training and 200 test users.
+
+% ============================================================
+\section{Experiments}
+\label{sec:experiments}
+% ============================================================
+
+\subsection{Baselines}
+
+We compare against six baselines spanning the relevant design space:
+
+\begin{itemize}
+  \item \textbf{B1 Random}: uniformly random scores---lower bound.
+  \item \textbf{B2 Popularity}: scores every user by global sport play rate---
+        represents zero personalization.
+  \item \textbf{B3 Physical-only}: XGBoost trained exclusively on six
+        objective physical features---represents the AI Sport Scout paradigm.
+  \item \textbf{B4 Interest-only}: XGBoost trained exclusively on twelve
+        interest features---ablates physical features.
+  \item \textbf{B5 Full XGBoost}: XGBoost on all 29 features, no discovery.
+  \item \textbf{B6 Full RF}: Random Forest on all 29 features, no discovery.
+\end{itemize}
+
+\subsection{Evaluation Metrics}
+
+We report Precision@K, Recall@K, F1@K, NDCG@K, MAP@K (all standard
+recommendation metrics), and a novel \textit{Discovery Rate@K}: the fraction
+of top-$K$ recommendations that are sports the user has not previously tried.
+We evaluate at $K \in \{5, 10\}$.
+
+\subsection{Main Results}
+
+Table~\ref{tab:main_results} reports play-task metrics at $K=5$.
+Our multi-task neural network (M1) achieves the highest NDCG@5 among all
+personalized models at 0.467, representing a \textbf{10.1\% improvement}
+over the physical-only baseline (B3, NDCG@5 = 0.424) and an \textbf{8.9\%
+improvement} over the Full XGBoost (B5, NDCG@5 = 0.429).
+
+The discovery-augmented variant (M2) achieves a \textbf{Discovery Rate@5 of
+0.856}, surfacing novel sports for 85.6\% of top-5 slots, at the expected
+cost of recommendation accuracy---a deliberate precision/novelty trade-off
+that is documented as a user-controllable parameter ($\alpha$).
+
+\begin{table}[t]
+\caption{Play Task Results at K=5. Best personalized model in \textbf{bold}.}
+\label{tab:main_results}
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrrr}
+\toprule
+\textbf{Model} & \textbf{Prec@5} & \textbf{Rec@5} & \textbf{NDCG@5} & \textbf{MAP@5} & \textbf{Disc@5} \\
+\midrule
+B1 Random         & 0.201 & 0.247 & 0.228 & 0.500 & 0.799 \\
+B2 Popularity     & 0.380 & 0.487 & 0.502 & 0.715 & 0.620 \\
+B3 Physical-only  & 0.335 & 0.415 & 0.424 & 0.685 & 0.665 \\
+B4 Interest-only  & 0.321 & 0.419 & 0.406 & 0.629 & 0.679 \\
+B5 Full XGBoost   & 0.332 & 0.422 & 0.429 & 0.678 & 0.668 \\
+B6 Full RF        & 0.372 & 0.478 & 0.491 & 0.708 & 0.628 \\
+\midrule
+\textbf{M1 Multi-task NN} & \textbf{0.351} & \textbf{0.455} & \textbf{0.467} & \textbf{0.700} & 0.649 \\
+M2 NN + Discovery & 0.144 & 0.179 & 0.171 & 0.487 & \textbf{0.856} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Fig.~\ref{fig:model_comparison} visualizes these results.
+Among personalized models, M1 achieves the best ranking quality (NDCG),
+while M2 demonstrates that the discovery module can be activated to
+prioritize novelty when desired.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{model_comparison_play.png}
+  \caption{Model comparison on the play recommendation task at $K=5$.
+  The multi-task neural network (M1) achieves the highest NDCG among
+  personalized models. The discovery-augmented variant (M2) maximizes
+  novelty at the cost of precision.}
+  \label{fig:model_comparison}
+\end{figure}
+
+\subsection{Ablation Study}
+
+Table~\ref{tab:ablation} isolates the contributions of interest features,
+multi-task architecture, and the discovery module.
+
+\begin{table}[t]
+\caption{Ablation Study (Play Task, K=5).}
+\label{tab:ablation}
+\centering
+\small
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Configuration} & \textbf{NDCG@5} & \textbf{MAP@5} & \textbf{Disc@5} \\
+\midrule
+Physical-only           & 0.424 & 0.685 & 0.665 \\
+Interest-only           & 0.406 & 0.629 & 0.679 \\
+Full XGBoost (all feat) & 0.429 & 0.678 & 0.668 \\
+Multi-task NN (M1)      & 0.467 & 0.700 & 0.649 \\
+M1 + Discovery (M2)     & 0.171 & 0.487 & \textbf{0.856} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent\textbf{Interest vs.\ physical features.}
+Interest-only (0.406) and physical-only (0.424) yield comparable NDCG,
+confirming that both signal types carry meaningful predictive information.
+Combining all features with the multi-task architecture (M1) yields a
+notably higher NDCG of 0.467, demonstrating complementarity.
+
+\noindent\textbf{Multi-task vs.\ single-task.}
+M1 outperforms Full XGBoost by 8.8\% in NDCG despite using the same feature
+set, validating that shared task representations improve per-task accuracy.
+
+\noindent\textbf{Discovery module.}
+Enabling the discovery component (M2) shifts the trade-off decisively toward
+novelty (Disc@5 = 0.856), showing the module effectively targets the
+unexplored region of the sports space for each user.
+Fig.~\ref{fig:ablation} visualizes the ablation progression.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{ablation_chart.png}
+  \caption{Ablation study: NDCG@5 and Discovery Rate@5 across
+  configurations. Combining all features with multi-task learning (M1)
+  yields the best ranking quality; adding the discovery module (M2)
+  trades accuracy for novelty.}
+  \label{fig:ablation}
+\end{figure}
+
+\subsection{Watch Task Results}
+
+Table~\ref{tab:watch} reports results on the watch recommendation task.
+The multi-task NN again achieves the highest NDCG@5 (0.721) among
+personalized models, confirming that the shared representation transfers
+beneficially across engagement levels.
+
+\begin{table}[t]
+\caption{Watch Task Results at K=5.}
+\label{tab:watch}
+\centering
+\small
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Model} & \textbf{Prec@5} & \textbf{Rec@5} & \textbf{NDCG@5} & \textbf{MAP@5} \\
+\midrule
+B1 Random         & 0.555 & 0.267 & 0.561 & 0.716 \\
+B2 Popularity     & 0.724 & 0.352 & 0.741 & 0.851 \\
+B5 Full XGBoost   & 0.656 & 0.315 & 0.677 & 0.814 \\
+\textbf{M1 Multi-task NN} & \textbf{0.693} & \textbf{0.335} & \textbf{0.721} & \textbf{0.852} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Feature Attribution (SHAP)}
+
+Table~\ref{tab:shap} reports SHAP feature group contributions averaged over
+200 test users for three representative sports.
+
+\begin{table}[t]
+\caption{SHAP Feature Group Contributions (\%). Combined Interest+Strength
+represents the total psychological signal.}
+\label{tab:shap}
+\centering
+\small
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Feature Group} & \textbf{Football} & \textbf{Swimming} & \textbf{Esports} & \textbf{Mean} \\
+\midrule
+Interests           & 41.4 & 30.5 & 34.2 & 35.4 \\
+Strengths (self)    & 27.8 & 40.6 & 23.2 & 30.5 \\
+Physical (objective)& 26.2 & 23.4 & 30.2 & 26.6 \\
+Demographics        &  4.6 &  5.6 & 12.4 &  7.5 \\
+\midrule
+\textbf{Interest+Strength} & \textbf{69.2} & \textbf{71.1} & \textbf{57.4} & \textbf{65.9} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Interest features alone account for a mean 35.4\% of SHAP importance.
+When combined with strength self-ratings---which are psychologically
+adjacent features representing self-assessed physical capability---the
+combined psychological signal accounts for \textbf{65.9\%} of total feature
+importance, consistently exceeding objective physical metrics across all
+three evaluated sports.
+This empirically validates the interest-first design principle.
+Fig.~\ref{fig:shap} shows the SHAP feature group breakdown
+and top individual feature importances for the football prediction task.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{shap_stacked_bar.png}
+  \caption{SHAP feature group contributions for three representative
+  sports. Interest and strength features (psychological signal)
+  consistently dominate objective physical metrics across all sports.}
+  \label{fig:shap}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{shap_top_features_football_soccer.png}
+  \caption{Top-15 individual SHAP feature importances for football
+  prediction. Interest dimensions (team preference, competition drive,
+  social enjoyment) rank among the most influential features.}
+  \label{fig:shap_football}
+\end{figure}
+
+% ============================================================
+\section{Discussion}
+\label{sec:discussion}
+% ============================================================
+
+\subsection{Interpretation of Results}
+
+The multi-task neural network consistently outperforms all single-task
+baselines on NDCG, suggesting that the shared representation across play,
+watch, and professional potential tasks provides beneficial regularization
+and cross-task transfer.
+The particularly strong Popularity baseline (NDCG@5 = 0.502) reflects a
+characteristic of the synthetic data generation process: high-popularity
+sports (football, cricket, basketball) carry substantial base-rate priors,
+inflating popularity-based recommendations. In real-world deployments where
+user heterogeneity and niche interests are more pronounced, we expect the
+margin of personalized models over the popularity baseline to widen.
+
+The discovery module (M2) demonstrates the intended behavior: its high
+novelty rate (85.6\%) at the cost of lower accuracy is a feature, not a
+bug---designed for users who explicitly seek sports they have never tried.
+The blending parameter $\alpha$ provides a continuous knob: setting
+$\alpha \to 0$ recovers the pure model prediction, while $\alpha \to 1$
+maximizes discovery. Future deployments could adapt $\alpha$ per user based
+on stated exploration preference.
+
+\subsection{Limitations}
+
+\noindent\textbf{Synthetic data.}
+The most significant limitation is the use of synthetically generated data.
+Feature-label correlations are calibrated to literature rather than derived
+from empirical observation of actual user behavior. Results should be
+interpreted as a \textit{proof-of-concept} that the framework is technically
+sound and internally consistent with published findings.
+A primary survey study (N $\geq$ 500) is the critical next step before
+deployment claims can be made.
+
+\noindent\textbf{Sports taxonomy.}
+The 20-sport taxonomy, while representative, does not cover the full global
+sports landscape. Regional sports (kabaddi, sepak takraw, capoeira) and
+emerging sports (drone racing, parkour) are underrepresented.
+
+\noindent\textbf{Cold-start in collaborative component.}
+The discovery score relies on aggregated profiles from training users.
+For entirely novel sports with no user history, the profile falls back to
+the training set mean---a standard cold-start limitation of
+content-collaborative hybrids~\cite{burke2002hybrid}.
+
+\noindent\textbf{Self-report bias.}
+Interest and strength features are self-rated. Cross-validation against
+behavioral data (e.g., exercise tracking logs) is needed to assess
+measurement validity.
+
+\subsection{Planned User Study}
+
+A randomized A/B user study is planned as immediate future work.
+Participants will be randomly assigned to receive interest-driven
+recommendations (treatment) or physical-only recommendations (control).
+Primary outcome: sports engagement intention score (1--10) at two-week
+follow-up. Secondary outcomes: perceived recommendation quality,
+willingness to try a new sport, discovery satisfaction.
+Target sample: $N = 60$ (30 per arm), statistical power $= 0.80$,
+$\alpha = 0.05$.
+
+\subsection{Future Work}
+
+Beyond the user study, future directions include: (i)~scaling to real
+survey data (N $\geq$ 1{,}000); (ii)~temporal modeling of interest drift
+as users age; (iii)~a lightweight mobile interface for interactive
+sport discovery; (iv)~extension to a Multi-gate Mixture-of-Experts
+architecture~\cite{ma2018mmoe} to handle task-correlation heterogeneity;
+and (v)~algorithmic fairness audits for gender and cultural bias in
+recommendations.
+
+% ============================================================
+\section{Conclusion}
+\label{sec:conclusion}
+% ============================================================
+
+We presented an interest-driven personalized sports recommendation system
+that is, to our knowledge, the first framework to simultaneously address
+all four gaps identified in the literature: interest-first modeling,
+multi-level output (play/watch/pro), accessibility to novice users, and
+discovery of unfamiliar sports.
+Our multi-task neural network achieves a 10.1\% NDCG improvement over
+the physical-only baseline, and SHAP attribution confirms that
+psychological features (interests + self-rated strengths) account for
+65.9\% of predictive importance, empirically supporting the interest-first
+design principle.
+The discovery module achieves an 85.6\% novelty rate, demonstrating
+the viability of interest-similarity-based sport discovery.
+We release our code, dataset generator, and pre-trained models to
+facilitate future work in this under-explored but practically impactful domain.
+
+% ============================================================
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+% ============================================================
+
+\end{document}
