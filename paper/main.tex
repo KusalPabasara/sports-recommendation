@@ -10,7 +10,7 @@
 \usepackage{xcolor}
 \usepackage{booktabs}
 \usepackage{multirow}
-\usepackage{url}
+\usepackage[hyphens]{url}
 \usepackage{hyperref}
 \hypersetup{colorlinks=true, linkcolor=black, citecolor=black, urlcolor=blue}
 
@@ -110,10 +110,10 @@ We make the following contributions:
         framework}, placing Likert-scaled personal interest profiles as the
         dominant input signal, with physical and demographic features as
         secondary factors.
-  \item We design a \textbf{stacking ensemble} combining hyperparameter-tuned
-        XGBoost and Random Forest with a logistic regression meta-learner,
-        achieving a 17.4\% NDCG improvement over the physical-only baseline
-        using exclusively classical ML methods.
+  \item We design a \textbf{stacking ensemble} that combines tuned
+        XGBoost and Random~Forest base learners with a logistic
+        regression meta-learner, achieving 17.4\% NDCG improvement
+        over the physical-only baseline using classical ML only.
   \item We introduce a \textbf{discovery score}, a cosine-similarity metric
         that surfaces sports the user has never encountered, ranked by latent
         interest alignment---achieving a novelty rate of 85.7\% at $K{=}5$.
@@ -236,20 +236,21 @@ signal, (ii) targets general and novice users, (iii) surfaces
 this using only classical ML methods without deep learning.
 
 \begin{table}[t]
-\caption{Comparison with Related Work}
+\caption{Comparison with Related Work.}
 \label{tab:gap}
 \centering
 \small
+\setlength{\tabcolsep}{3pt}
 \begin{tabular}{lcccc}
 \toprule
-\textbf{Work} & \textbf{Interest-first} & \textbf{Classical ML} & \textbf{Novice} & \textbf{Discovery} \\
+\textbf{Work} & \textbf{Interest} & \textbf{Classical} & \textbf{Novice} & \textbf{Disc.} \\
 \midrule
-AI Sport Scout \cite{aisportscout2024}       & \texttimes & \checkmark & \texttimes & \texttimes \\
-Ramos et al.\ \cite{ramos2022talent}         & \texttimes & \checkmark & \texttimes & \texttimes \\
-Opast recs.\ \cite{opast2023personalized}   & \texttimes & \checkmark & \checkmark & \texttimes \\
-IARCI student \cite{iarci2023student}        & partial    & \checkmark & \checkmark & \texttimes \\
-Ma et al.\ MTL \cite{ma2018mmoe}             & \texttimes & \texttimes & \texttimes & \texttimes \\
-\textbf{Ours}                                & \textbf{\checkmark} & \textbf{\checkmark} & \textbf{\checkmark} & \textbf{\checkmark} \\
+AI Sport Scout~\cite{aisportscout2024}    & \texttimes & \checkmark & \texttimes & \texttimes \\
+Ramos et al.~\cite{ramos2022talent}       & \texttimes & \checkmark & \texttimes & \texttimes \\
+Opast recs.~\cite{opast2023personalized}  & \texttimes & \checkmark & \checkmark & \texttimes \\
+IARCI~\cite{iarci2023student}             & \textit{partial} & \checkmark & \checkmark & \texttimes \\
+Ma et al.~\cite{ma2018mmoe}               & \texttimes & \texttimes & \texttimes & \texttimes \\
+\textbf{Ours}                              & \textbf{\checkmark} & \textbf{\checkmark} & \textbf{\checkmark} & \textbf{\checkmark} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -266,7 +267,7 @@ comprising interest, strength, physical, and demographic features.
 Let $\mathcal{S} = \{s_1, \ldots, s_N\}$ denote the sports taxonomy of $N = 20$ sports.
 We define two binary label vectors per user:
 $\mathbf{y}^{(\text{play})}, \mathbf{y}^{(\text{watch})} \in \{0,1\}^N$,
-representing active participation and spectator interest respectively.
+representing active participation and spectator interest, respectively.
 The goal is to learn a function $f: \mathbb{R}^d \to [0,1]^{N}$ per task that
 predicts the probability of engagement with each sport.
 
@@ -312,10 +313,13 @@ self-ratings, $b_s$ is the sport's global popularity prior,
 and $\epsilon \sim \mathcal{N}(0, 0.15)$ is noise.
 The factor of 2 on the interest term implements the interest-first weighting.
 
-Binary play labels are sampled as
-$y^{(\text{play})}_{u,s} \sim \text{Bernoulli}(\sigma(5(a_{u,s} - 1.5)))$,
-giving a mean of $\approx 4$ sports played per user---consistent with
-population sports participation statistics~\cite{kokolakakis2016participation}.
+Binary play labels are sampled as:
+\begin{equation}
+  y^{(\text{play})}_{u,s} \sim \text{Bernoulli}\!\left(\sigma\!\left(5(a_{u,s} - 1.5)\right)\right)
+\end{equation}
+where $\sigma$ is the logistic sigmoid, yielding $\approx 4$ sports
+per user---consistent with participation
+statistics~\cite{kokolakakis2016participation}.
 
 Correlation targets are verified against literature benchmarks:
 (i) interest--enjoyment Pearson $r \geq 0.60$~\cite{vallerand2003passions};
@@ -330,7 +334,7 @@ distributions across the 20-sport taxonomy.
   \centering
   \includegraphics[width=\columnwidth]{sport_label_distributions.png}
   \caption{Play and watch participation rates across the 20-sport taxonomy
-  in the synthetic dataset ($N = 1{,}000$). Football, cricket, and basketball
+  in the synthetic dataset ($M = 1{,}000$). Football, cricket, and basketball
   exhibit the highest base rates, consistent with global popularity priors.}
   \label{fig:label_dist}
 \end{figure}
@@ -351,18 +355,31 @@ Default hyperparameters often underperform on novel tasks.
 We apply grid search with 3-fold stratified cross-validation
 to tune both XGBoost and Random Forest, searching over:
 
-\noindent\textbf{XGBoost:}
-\texttt{n\_estimators} $\in \{100, 200, 300\}$,
-\texttt{max\_depth} $\in \{3, 5, 7\}$,
-\texttt{learning\_rate} $\in \{0.01, 0.05, 0.1\}$,
-\texttt{subsample} $\in \{0.7, 0.8, 1.0\}$,
-\texttt{colsample\_bytree} $\in \{0.7, 0.8, 1.0\}$.
+\smallskip
+\noindent\textbf{XGBoost} search space:
+\smallskip
 
-\noindent\textbf{Random Forest:}
-\texttt{n\_estimators} $\in \{100, 200, 300\}$,
-\texttt{max\_depth} $\in \{5, 8, 12, \text{None}\}$,
-\texttt{min\_samples\_leaf} $\in \{2, 5, 10\}$,
-\texttt{max\_features} $\in \{\sqrt{d}, \log_2 d, 0.5d\}$.
+\noindent
+\begin{tabular}{@{}ll@{}}
+\texttt{n\_estimators}       & $\{100,\, 200,\, 300\}$ \\
+\texttt{max\_depth}          & $\{3,\, 5,\, 7\}$ \\
+\texttt{learning\_rate}      & $\{0.01,\, 0.05,\, 0.1\}$ \\
+\texttt{subsample}           & $\{0.7,\, 0.8,\, 1.0\}$ \\
+\texttt{colsample\_bytree}   & $\{0.7,\, 0.8,\, 1.0\}$ \\
+\end{tabular}
+
+\smallskip
+\noindent\textbf{Random Forest} search space:
+\smallskip
+
+\noindent
+\begin{tabular}{@{}ll@{}}
+\texttt{n\_estimators}       & $\{100,\, 200,\, 300\}$ \\
+\texttt{max\_depth}          & $\{5,\, 8,\, 12,\, \text{None}\}$ \\
+\texttt{min\_samples\_leaf}  & $\{2,\, 5,\, 10\}$ \\
+\texttt{max\_features}       & $\{\sqrt{d},\, \log_2 d,\, 0.5d\}$ \\
+\end{tabular}
+\smallskip
 
 Tuning is performed on the first sport label (highest base rate) and the
 selected hyperparameters are applied to all 20 per-sport classifiers via
@@ -463,10 +480,10 @@ controlled by the blending parameter $\alpha$.
 \label{tab:main_results}
 \centering
 \small
-\setlength{\tabcolsep}{4pt}
+\setlength{\tabcolsep}{3pt}
 \begin{tabular}{lrrrrr}
 \toprule
-\textbf{Model} & \textbf{Prec@5} & \textbf{Rec@5} & \textbf{NDCG@5} & \textbf{MAP@5} & \textbf{Disc@5} \\
+\textbf{Model} & \textbf{P@5} & \textbf{R@5} & \textbf{NDCG@5} & \textbf{MAP@5} & \textbf{DR@5} \\
 \midrule
 B1 Random         & 0.201 & 0.247 & 0.228 & 0.500 & 0.799 \\
 B2 Popularity     & 0.380 & 0.487 & 0.502 & 0.715 & 0.620 \\
@@ -491,7 +508,7 @@ prioritize novelty when desired.
 \begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{model_comparison_play.png}
-  \caption{Model comparison on the play recommendation task at $K=5$.
+  \caption{Model comparison on the play recommendation task at $K{=}5$.
   The stacking ensemble (S1) achieves the highest NDCG among
   personalized models. The discovery-augmented variant (S2) maximizes
   novelty at the cost of precision.}
@@ -592,9 +609,10 @@ represents the total psychological signal.}
 \label{tab:shap}
 \centering
 \small
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{lrrrr}
 \toprule
-\textbf{Feature Group} & \textbf{Football} & \textbf{Swimming} & \textbf{Esports} & \textbf{Mean} \\
+\textbf{Feature Group} & \textbf{Football} & \textbf{Swim.} & \textbf{Esports} & \textbf{Mean} \\
 \midrule
 Interests           & 41.4 & 30.5 & 34.2 & 35.4 \\
 Strengths (self)    & 27.8 & 40.6 & 23.2 & 30.5 \\
@@ -613,8 +631,9 @@ combined psychological signal accounts for \textbf{65.9\%} of total feature
 importance, consistently exceeding objective physical metrics across all
 three evaluated sports.
 This empirically validates the interest-first design principle.
-Fig.~\ref{fig:shap} shows the SHAP feature group breakdown
-and top individual feature importances for the football prediction task.
+Fig.~\ref{fig:shap} shows the SHAP feature group breakdown;
+Fig.~\ref{fig:shap_football} details the top individual feature
+importances for the football prediction task.
 
 \begin{figure}[t]
   \centering
@@ -668,7 +687,7 @@ Feature-label correlations are calibrated to literature rather than derived
 from empirical observation of actual user behavior. Results should be
 interpreted as a \textit{proof-of-concept} that the framework is technically
 sound and internally consistent with published findings.
-A primary survey study (N $\geq$ 500) is the critical next step before
+A primary survey study ($N \geq 500$) is the critical next step before
 deployment claims can be made.
 
 \noindent\textbf{Sports taxonomy.}
@@ -701,7 +720,7 @@ significance level $p < 0.05$.
 \subsection{Future Work}
 
 Beyond the user study, future directions include: (i)~scaling to real
-survey data (N $\geq$ 1{,}000); (ii)~temporal modeling of interest drift
+survey data ($N \geq 1{,}000$); (ii)~temporal modeling of interest drift
 as users age; (iii)~a lightweight mobile interface for interactive
 sport discovery; (iv)~per-sport hyperparameter tuning and advanced
 ensemble strategies such as Multi-gate Mixture-of-Experts~\cite{ma2018mmoe};
