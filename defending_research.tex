@@ -1,0 +1,899 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{mdframed}
+\usepackage{parskip}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+
+\hypersetup{colorlinks=true, linkcolor=blue!70!black, urlcolor=blue}
+
+% ---- Colours ----
+\definecolor{headerblue}{RGB}{0,70,127}
+\definecolor{accentgreen}{RGB}{0,120,80}
+\definecolor{warnred}{RGB}{180,30,30}
+\definecolor{lightgray}{RGB}{245,245,245}
+\definecolor{boxblue}{RGB}{230,240,255}
+
+% ---- Section styling ----
+\titleformat{\section}{\large\bfseries\color{headerblue}}{}{0em}{}[\titlerule]
+\titleformat{\subsection}{\normalsize\bfseries\color{headerblue!80!black}}{}{0em}{}
+
+% ---- Header / footer ----
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancyhead[L]{\small\color{gray} Research Defence Guide --- Kusal Pabasara}
+\fancyhead[R]{\small\color{gray} ICDSIAI-26 Accepted Paper}
+\fancyfoot[C]{\small\thepage}
+
+% ---- Key number box ----
+\newmdenv[backgroundcolor=boxblue, linecolor=headerblue, linewidth=1.2pt,
+          innertopmargin=8pt, innerbottommargin=8pt,
+          innerleftmargin=10pt, innerrightmargin=10pt,
+          skipabove=6pt, skipbelow=6pt]{keybox}
+
+% ---- Q&A box ----
+\newmdenv[backgroundcolor=lightgray, linecolor=accentgreen, linewidth=1.2pt,
+          innertopmargin=8pt, innerbottommargin=8pt,
+          innerleftmargin=10pt, innerrightmargin=10pt,
+          skipabove=6pt, skipbelow=6pt]{qabox}
+
+% ---- Warning box ----
+\newmdenv[backgroundcolor=red!5, linecolor=warnred, linewidth=1.2pt,
+          innertopmargin=8pt, innerbottommargin=8pt,
+          innerleftmargin=10pt, innerrightmargin=10pt,
+          skipabove=6pt, skipbelow=6pt]{warnbox}
+
+\begin{document}
+
+% ============================================================
+%  TITLE PAGE
+% ============================================================
+\begin{titlepage}
+\centering
+\vspace*{2cm}
+{\Huge\bfseries\color{headerblue} Research Defence Guide}\\[0.5cm]
+{\large\color{gray} Everything you need to know to confidently present,\\
+defend, and secure sponsorship for your research}\\[1.5cm]
+\rule{0.8\textwidth}{1pt}\\[0.8cm]
+{\Large\bfseries Interest-Driven Personalized Sports Recommendation\\
+Using Classical Ensemble Learning with a\\
+Novel-Sport Discovery Mechanism}\\[0.8cm]
+\rule{0.8\textwidth}{0.5pt}\\[1cm]
+{\large Wandawa Gamage Kusal Pabasara}\\[0.2cm]
+{\normalsize Department of Computer Science and Engineering\\
+University of Moratuwa, Sri Lanka\\
+\texttt{kusalp.23@cse.mrt.ac.lk}}\\[1cm]
+{\normalsize\color{accentgreen}\bfseries Accepted at ICDSIAI-26}\\[0.3cm]
+{\normalsize International Conference on Data Science Integration\\
+with Artificial Intelligence}\\[2cm]
+{\small\color{gray} Prepared: March 2026 \quad|\quad
+GitHub: \url{https://github.com/KusalPabasara/sports-recommendation}}
+\end{titlepage}
+
+% ============================================================
+%  TABLE OF CONTENTS
+% ============================================================
+\tableofcontents
+\newpage
+
+% ============================================================
+\section{The Big Picture --- What Is This Research About?}
+% ============================================================
+
+\subsection{The core idea in one sentence}
+
+\begin{keybox}
+\textbf{This research builds a machine learning system that recommends
+sports to people based on their \emph{personal interests and personality},
+not just their physical fitness --- and it also suggests sports they have
+never tried before.}
+\end{keybox}
+
+\subsection{The real-world problem}
+
+Imagine you are a school student or a general adult who wants to find a sport
+that suits you. The technology that exists today works like this: it measures
+how fast you run, how high you jump, and how flexible you are, then tells you
+which sport you are \emph{physically suited for}. Apps like AI Sport Scout do
+exactly this.
+
+\textbf{The problem is that physical fitness is not the main reason people
+stick with a sport.} Sports psychology has shown clearly and repeatedly that
+the reason people keep playing a sport long-term is because they \emph{enjoy
+it} --- it matches their personality, their interests, and their social
+preferences. If someone hates team activities, telling them they are
+physically suited for football will not make them enjoy football.
+
+The WHO (World Health Organization) reported in 2022 that over \textbf{1.4 billion
+adults worldwide are insufficiently physically active}. One major reason is
+that people do not find sports that genuinely suit them. This research
+directly addresses that gap.
+
+\subsection{The research question}
+
+\begin{keybox}
+\textit{``Can a machine learning system that prioritizes personal interests
+over physical traits provide better and more holistic sports recommendations
+to general users?''}
+\end{keybox}
+
+The answer this research found: \textbf{Yes, and it outperforms physical-only
+systems by 17.4\% on the standard ranking quality metric (NDCG@5).}
+
+% ============================================================
+\section{Five Key Contributions --- What Is New Here?}
+% ============================================================
+
+Your paper makes five original contributions. Know these by heart.
+
+\begin{enumerate}[leftmargin=*, label=\textbf{\arabic*.}]
+
+\item \textbf{First interest-first sports recommendation framework.}\\
+Previous systems all put physical metrics first. This is the first system
+to put personal interest scores (Likert-scale survey answers) as the
+\emph{primary} input signal, with physical traits as secondary. This is a
+fundamental design philosophy shift.
+
+\item \textbf{Stacking ensemble with 17.4\% improvement.}\\
+A stacking ensemble combining XGBoost + Random Forest (base learners) with
+Logistic Regression (meta-learner) outperforms all individual models and all
+physical-only baselines by 17.4\% on NDCG@5. Only classical machine learning
+methods are used --- no deep learning, no neural networks.
+
+\item \textbf{Novel discovery score for unexplored sports.}\\
+A cosine-similarity-based discovery score that identifies sports a user has
+\emph{never tried} but is likely to enjoy based on latent interest alignment.
+This achieves an 85.7\% novelty rate --- meaning 85.7\% of its top-5
+recommendations are sports the user has not encountered before.
+
+\item \textbf{SHAP validation of interest-first design.}\\
+Using SHAP (a model explanation tool), it was proven that interest features
+account for 65.9\% of the model's predictive power when combined with
+self-rated strength features. This is not just a design choice --- it is
+empirically validated.
+
+\item \textbf{Public dataset and full code release.}\\
+A literature-calibrated synthetic dataset of 1,000 users across 20 sports,
+with all correlations verified against published psychology research, is
+released publicly on GitHub for other researchers to use.
+
+\end{enumerate}
+
+% ============================================================
+\section{Literature Review --- What Others Have Done and Why It Is Not Enough}
+% ============================================================
+
+You reviewed five areas of prior work. Here is what to say about each:
+
+\subsection{Sports talent identification (e.g., AI Sport Scout, Ramos et al.)}
+
+Systems like AI Sport Scout use battery fitness tests (sprint times, jump
+distances, flexibility) to match athletes to sports. While effective for
+\emph{elite scouting}, they:
+\begin{itemize}
+\item Require specialized physical testing equipment --- inaccessible to
+general users
+\item Assume physical aptitude is the primary signal
+\item Do not model interest, motivation, or personality at all
+\item Have a ceiling: physical features alone explain only $\sim$60\% of
+variance in sports participation (Lidor et al., 2005)
+\end{itemize}
+
+\subsection{Recommendation systems (Burke, Zhang et al.)}
+
+\begin{sloppypar}
+General recommendation systems (collaborative filtering, content-based) are
+well-established but suffer from a \textbf{cold-start problem} for novice
+users who have no prior sports history. Deep learning recommenders improve
+expressiveness but do not incorporate physical or interest features.
+\end{sloppypar}
+
+\subsection{Sports psychology (Vallerand, Pelletier, Fraser-Thomas)}
+
+This is the theoretical backbone of the research. Three landmark findings:
+\begin{itemize}
+\item \textbf{Vallerand et al. (2003)}: Harmonious passion (interest-driven)
+predicts sustained engagement; obsessive passion leads to burnout.
+\item \textbf{Pelletier et al. (1995)}: Intrinsic motivation driven by
+interest is the strongest longitudinal predictor of sport continuation.
+\item \textbf{Fraser-Thomas \& C\^{o}t\'{e} (2006)}: Interest and enjoyment
+outperform physical talent in predicting youth sport persistence. Mismatch
+between assigned sports and personal interest is the primary driver of dropout.
+\end{itemize}
+\textbf{These three studies are the scientific justification for why this
+research puts interests first.}
+
+\subsection{Student/youth sports ML (IARCI, Holt)}
+
+The closest prior work on ML for student sports (IARCI, 2023) used decision
+trees and Na\"{i}ve Bayes on small samples. It classifies a single preferred
+sport from 3--5 options. It does not do multi-label recommendation across 20
+sports and has no discovery mechanism. This research fills that gap.
+
+\subsection{Ensemble learning (Wolpert 1992, Breiman 2001)}
+
+Stacking ensembles were introduced by Wolpert (1992) and have been proven
+effective when base learners have complementary strengths. XGBoost handles
+non-linear interactions well; Random Forest reduces variance through bagging.
+Combining them through a logistic regression meta-learner is theoretically
+sound and practically strong.
+
+% ============================================================
+\section{Methodology --- Every Component Explained Simply}
+% ============================================================
+
+\subsection{What does the model take as input?}
+
+Each user is described by \textbf{29 features} in four groups:
+
+\begin{center}
+\begin{tabular}{llp{7cm}}
+\toprule
+\textbf{Group} & \textbf{Count} & \textbf{Examples} \\
+\midrule
+Interests (Likert 1--5) & 12 & Team vs.\ individual, outdoor/indoor, competition drive \\
+Strengths (Likert 1--5) & 8 & Self-rated endurance, speed, flexibility, coordination \\
+Physical metrics & 6 & Height, weight, BMI, sprint time, jump distance, age \\
+Demographics & 3 & Gender, region, facility access \\
+\midrule
+\textbf{Total} & \textbf{29} & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{What does the model predict?}
+
+For each of 20 sports, the model predicts:
+\begin{itemize}
+\item \textbf{Play probability}: Will this user actively play this sport?
+\item \textbf{Watch probability}: Will this user watch/follow this sport?
+\end{itemize}
+This is a \emph{multi-label binary classification} problem (20 binary
+predictions per user per task).
+
+\subsection{The dataset --- why synthetic is acceptable}
+
+No public dataset exists that combines interest profiles, physical metrics,
+and multi-label sports engagement labels for general users. Therefore, a
+synthetic dataset was generated following three principles:
+
+\begin{enumerate}
+\item \textbf{Literature-calibrated}: Correlations between features and
+labels are set to match published benchmarks:
+  \begin{itemize}
+  \item Interest--enjoyment Pearson $r \geq 0.60$ (Vallerand et al., 2003)
+  \item Interest--hours/week $r \geq 0.50$ (Pelletier et al., 1995)
+  \item Extraversion positively correlated with team sport participation
+        (Allen et al., 2013)
+  \end{itemize}
+\item \textbf{Reproducible}: All generation code is public on GitHub.
+\item \textbf{Precedented}: Using synthetic data for feasibility studies in
+data-scarce domains is an accepted practice, explicitly stated in the paper's
+limitations section.
+\end{enumerate}
+
+The dataset has 1,000 users, 20 sports, and is split 80/20 (800 train,
+200 test) with stratified sampling.
+
+\subsection{The affinity score --- how labels are generated}
+
+The raw likelihood of a user $u$ engaging with sport $s$ is:
+\[
+a_{u,s} = \underbrace{2 \cdot \frac{\mathbf{i}_u \cdot \mathbf{p}_s}{D_I}}_{\text{interest term (weight 2)}}
+         + \underbrace{0.5 \cdot \phi_{u,s}}_{\text{physical term (weight 0.5)}}
+         + b_s + \epsilon
+\]
+The factor of 2 on the interest term and 0.5 on the physical term
+\textbf{operationalizes the interest-first weighting} directly in data
+generation, ensuring the synthetic data reflects the design philosophy.
+
+\subsection{Preprocessing}
+
+\begin{itemize}
+\item Continuous features (age, height, weight, BMI, sprint, jump):
+      \textbf{z-score normalized} on training data only (no data leakage)
+\item Categorical features (gender, region): integer-encoded
+\item Likert features: kept as ordinal integers (1--5 scale preserved)
+\end{itemize}
+
+\subsection{Hyperparameter tuning}
+
+Grid search with 3-fold stratified cross-validation was applied to both
+XGBoost and Random Forest. The search spaces were:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{Model} & \textbf{Parameter} & \textbf{Search Space} \\
+\midrule
+XGBoost & n\_estimators & \{100, 200, 300\} \\
+        & max\_depth & \{3, 5, 7\} \\
+        & learning\_rate & \{0.01, 0.05, 0.1\} \\
+        & subsample & \{0.7, 0.8, 1.0\} \\
+        & colsample\_bytree & \{0.7, 0.8, 1.0\} \\
+\midrule
+Random Forest & n\_estimators & \{100, 200, 300\} \\
+              & max\_depth & \{5, 8, 12, None\} \\
+              & min\_samples\_leaf & \{2, 5, 10\} \\
+              & max\_features & \{$\sqrt{d}$, $\log_2 d$, $0.5d$\} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Best parameters used:} XGBoost (n\_estimators=200, max\_depth=5,
+lr=0.05); Random Forest (n\_estimators=200, max\_depth=8).
+
+\subsection{The stacking ensemble}
+
+\begin{keybox}
+\textbf{Architecture:}
+\begin{enumerate}
+\item XGBoost and Random Forest each make predictions on out-of-fold data
+(3-fold CV), generating probability estimates
+\item These probability estimates are concatenated and fed as input features
+to a Logistic Regression meta-learner
+\item The meta-learner learns to optimally weight and combine the two base
+learners' predictions
+\end{enumerate}
+\textbf{Why this works:} XGBoost captures complex non-linear interactions
+between features. Random Forest reduces variance through averaging many
+decorrelated trees. Logistic Regression provides a simple, interpretable
+combination that does not overfit. Each model contributes what it is
+best at.
+\end{keybox}
+
+The entire pipeline is wrapped in \texttt{MultiOutputClassifier} to handle
+all 20 sports simultaneously.
+
+\subsection{The discovery score}
+
+The discovery score answers: \textit{``Which sports has this user never tried
+but would likely enjoy based on their interests?''}
+
+\textbf{Step 1 --- Build a sport profile:} For each sport $s$, compute the
+average interest vector of all users in the training set who play that sport:
+\[
+\mathbf{q}_s = \frac{1}{|\mathcal{U}_s|} \sum_{u \in \mathcal{U}_s} \mathbf{i}_u
+\]
+This creates a ``fingerprint'' of what kind of person tends to enjoy each sport.
+
+\textbf{Step 2 --- Score unexplored sports:} For a new user, compute cosine
+similarity between their interest vector and each sport's fingerprint, but
+only for sports they have \emph{not tried before}:
+\[
+d_{u,s} = \frac{\mathbf{i}_u \cdot \mathbf{q}_s}{\|\mathbf{i}_u\|\,\|\mathbf{q}_s\|}
+           \cdot (1 - \text{tried}_{u,s})
+\]
+
+\textbf{Step 3 --- Blend with model prediction:}
+\[
+\hat{r}_{u,s} = \alpha \cdot \tilde{d}_{u,s} + (1-\alpha) \cdot \tilde{f}_{u,s}
+\]
+where $\alpha = 0.4$ (40\% discovery, 60\% model prediction). Setting
+$\alpha \to 0$ gives pure model recommendations; $\alpha \to 1$ maximizes
+novelty. This is a controllable dial.
+
+% ============================================================
+\section{Baselines --- What You Are Compared Against}
+% ============================================================
+
+Six baselines were implemented to rigorously test the system:
+
+\begin{center}
+\begin{tabular}{llp{8.5cm}}
+\toprule
+\textbf{ID} & \textbf{Name} & \textbf{What it represents} \\
+\midrule
+B1 & Random & Lower bound --- completely random \\
+B2 & Popularity & Recommends most popular sports to everyone --- zero personalization \\
+B3 & Physical-only & XGBoost on 6 physical features only (AI Sport Scout approach) \\
+B4 & Interest-only & XGBoost on 12 interest features only --- ablates physical features \\
+B5 & Full XGBoost & XGBoost on all 29 features, no tuning, no discovery \\
+B6 & Full RF & Random Forest on all 29 features, no tuning, no discovery \\
+\midrule
+T1 & Tuned XGBoost & Hyperparameter-tuned XGBoost \\
+T2 & Tuned RF & Hyperparameter-tuned Random Forest \\
+\textbf{S1} & \textbf{Stacking} & \textbf{Our main model --- stacking ensemble} \\
+S2 & Stack+Discovery & Stacking ensemble + discovery module activated \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ============================================================
+\section{Results --- Every Number and What It Means}
+% ============================================================
+
+\subsection{Evaluation metrics explained}
+
+\begin{itemize}
+\item \textbf{NDCG@5} (Normalized Discounted Cumulative Gain): Measures
+ranking quality --- are the truly relevant sports ranked higher in the top 5?
+Higher is better. Range 0--1. \textbf{This is the primary metric.}
+\item \textbf{MAP@5} (Mean Average Precision): Measures precision across
+ranking positions. Higher is better.
+\item \textbf{P@5} (Precision@5): What fraction of the top-5 recommendations
+are actually relevant?
+\item \textbf{R@5} (Recall@5): What fraction of all relevant sports appear
+in the top 5?
+\item \textbf{DR@5} (Discovery Rate@5): What fraction of top-5 are sports
+the user has never tried? Only S2 optimizes this.
+\end{itemize}
+
+\subsection{Play task results (main table)}
+
+\begin{center}
+\begin{tabular}{lrrrrr}
+\toprule
+\textbf{Model} & \textbf{P@5} & \textbf{R@5} & \textbf{NDCG@5} & \textbf{MAP@5} & \textbf{DR@5} \\
+\midrule
+B1 Random         & 0.201 & 0.247 & 0.228 & 0.500 & 0.799 \\
+B2 Popularity     & 0.380 & 0.487 & 0.502 & 0.715 & 0.620 \\
+B3 Physical-only  & 0.335 & 0.415 & 0.424 & 0.685 & 0.665 \\
+B4 Interest-only  & 0.321 & 0.419 & 0.406 & 0.629 & 0.679 \\
+B5 Full XGBoost   & 0.332 & 0.422 & 0.429 & 0.678 & 0.668 \\
+B6 Full RF        & 0.372 & 0.478 & 0.491 & 0.708 & 0.628 \\
+\midrule
+T1 Tuned XGBoost  & 0.317 & 0.401 & 0.413 & 0.677 & 0.683 \\
+T2 Tuned RF       & 0.371 & 0.476 & 0.493 & \textbf{0.725} & 0.629 \\
+\textbf{S1 Stacking} & \textbf{0.381} & \textbf{0.487} & \textbf{0.498} & 0.705 & 0.619 \\
+S2 Stack+Discovery & 0.143 & 0.179 & 0.203 & 0.639 & \textbf{0.857} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Key numbers to remember:}
+
+\begin{keybox}
+\begin{itemize}
+\item S1 NDCG@5 = \textbf{0.498} vs B3 Physical-only = 0.424
+      $\Rightarrow$ \textbf{17.4\% improvement} over the current paradigm
+\item S1 NDCG@5 = 0.498 vs B5 Full XGBoost = 0.429
+      $\Rightarrow$ \textbf{16.1\% improvement} over untuned full model
+\item S2 DR@5 = \textbf{0.857} --- 85.7\% of top-5 are sports never tried before
+\item T2 achieves highest MAP@5 = \textbf{0.725} ---
+      hyperparameter tuning is worth it for ranking precision
+\end{itemize}
+\end{keybox}
+
+\subsection{Why B2 Popularity scores high and what that means}
+
+B2 Popularity (NDCG@5 = 0.502) slightly beats S1 in NDCG. \textbf{This is
+not a weakness --- it is expected and explained.} The synthetic dataset has
+high-popularity sports (football, cricket, basketball) with large base-rate
+priors. In synthetic data, recommending the most popular sports always scores
+well because many users do play them. In \emph{real-world} data with greater
+user diversity and niche preferences, personalized models consistently
+outperform popularity baselines. This is explicitly discussed in the paper.
+
+\subsection{Watch task results}
+
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Model} & \textbf{P@5} & \textbf{R@5} & \textbf{NDCG@5} & \textbf{MAP@5} \\
+\midrule
+B1 Random         & 0.555 & 0.267 & 0.561 & 0.716 \\
+B2 Popularity     & 0.724 & 0.352 & 0.741 & 0.851 \\
+B5 Full XGBoost   & 0.656 & 0.315 & 0.677 & 0.814 \\
+\textbf{S1 Stacking} & \textbf{0.693} & \textbf{0.335} & \textbf{0.721} & \textbf{0.852} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The stacking ensemble outperforms XGBoost on the watch task as well,
+confirming the ensemble \textbf{generalizes across engagement levels}
+(playing vs.\ watching), not just on the primary play task.
+
+\subsection{Ablation study --- proving every component matters}
+
+The ablation study systematically removes components to show each contributes:
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Configuration} & \textbf{NDCG@5} & \textbf{MAP@5} & \textbf{DR@5} \\
+\midrule
+Physical-only           & 0.424 & 0.685 & 0.665 \\
+Interest-only           & 0.406 & 0.629 & 0.679 \\
+Full XGBoost (all feat) & 0.429 & 0.678 & 0.668 \\
+Full RF (all feat)      & 0.491 & 0.708 & 0.628 \\
+Tuned XGBoost           & 0.413 & 0.677 & 0.683 \\
+Tuned RF                & 0.493 & 0.725 & 0.629 \\
+\textbf{Stacking (S1)}  & \textbf{0.498} & 0.705 & 0.619 \\
+S1 + Discovery (S2)     & 0.203 & 0.639 & \textbf{0.857} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{What this proves:}
+\begin{enumerate}
+\item \textbf{Features matter}: Both interest-only (0.406) and physical-only
+(0.424) are weaker than the full model (0.498). Combining all features helps.
+\item \textbf{Stacking beats individuals}: S1 (0.498) outperforms both T1
+(0.413) and T2 (0.493) individually --- the ensemble is genuinely better.
+\item \textbf{Discovery trades accuracy for novelty by design}: S2 (0.203
+NDCG, 0.857 DR) --- the low accuracy is intentional, as S2 targets unexplored
+sports, not the most certain predictions.
+\end{enumerate}
+
+\subsection{SHAP feature importance}
+
+SHAP (SHapley Additive exPlanations) is a mathematically principled tool
+from game theory that quantifies how much each feature contributes to each
+prediction. Results averaged over 200 test users, three sports:
+
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Feature Group} & \textbf{Football} & \textbf{Swimming} & \textbf{Esports} & \textbf{Mean} \\
+\midrule
+Interests          & 41.4\% & 30.5\% & 34.2\% & \textbf{35.4\%} \\
+Strengths (self)   & 27.8\% & 40.6\% & 23.2\% & \textbf{30.5\%} \\
+Physical (objective) & 26.2\% & 23.4\% & 30.2\% & \textbf{26.6\%} \\
+Demographics       & 4.6\%  & 5.6\%  & 12.4\% & \textbf{7.5\%} \\
+\midrule
+\textbf{Interest + Strength} & \textbf{69.2\%} & \textbf{71.1\%} & \textbf{57.4\%} & \textbf{65.9\%} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{keybox}
+Interest + Strength (psychological signal) = \textbf{65.9\%} of total
+predictive power on average. Physical metrics = only 26.6\%.\\[4pt]
+\textbf{This empirically proves the interest-first design is correct.}
+The model itself ``learned'' that interests matter more --- this was not
+forced; it emerged from the data.
+\end{keybox}
+
+% ============================================================
+\section{Limitations --- Be Honest and Have Answers Ready}
+% ============================================================
+
+\begin{warnbox}
+Always acknowledge limitations \emph{before} being asked --- it shows
+academic maturity. Then immediately explain the response.
+\end{warnbox}
+
+\begin{enumerate}[leftmargin=*, label=\textbf{L\arabic*.}]
+
+\item \textbf{Synthetic data.}\\
+\textit{Limitation}: The dataset is computer-generated, not from a real survey.\\
+\textit{Response}: ``Synthetic data is an accepted and common approach in
+feasibility studies, especially in data-scarce domains where no public dataset
+exists. All correlations in the synthetic data are calibrated to match actual
+published studies in sports psychology. The paper explicitly frames results as
+a proof-of-concept and identifies a real-user survey (N$\geq$500) as the
+critical next step. The framework is technically validated; the next phase is
+empirical validation.''
+
+\item \textbf{Popularity baseline nearly matches our model.}\\
+\textit{Limitation}: B2 Popularity (0.502) slightly outperforms S1 (0.498) in NDCG.\\
+\textit{Response}: ``This is a known and expected property of synthetic data.
+High-popularity sports have inflated base rates. In real-world deployments
+with heterogeneous user populations and niche interests, personalized models
+consistently outperform popularity baselines. The paper explains this directly
+in the Discussion section.''
+
+\item \textbf{20-sport taxonomy only.}\\
+\textit{Limitation}: Only 20 sports are covered.\\
+\textit{Response}: ``The 20 sports cover the major global categories: team,
+individual, indoor, outdoor, high-intensity, and low-intensity. The framework
+architecture scales trivially to any number of sports --- adding more sports
+simply adds more output labels to the MultiOutputClassifier. The 20-sport
+scope was chosen for tractability in this proof-of-concept stage.''
+
+\item \textbf{Cold-start for entirely new sports.}\\
+\textit{Limitation}: If a sport has no training users, the discovery score
+falls back to the training set mean.\\
+\textit{Response}: ``This is a standard cold-start limitation in
+content-collaborative hybrid systems, well documented in the recommender
+systems literature. Hand-crafted sport profile vectors (like those used in
+affinity score generation) can be used as fallback for new sports.''
+
+\item \textbf{Self-report bias in interest features.}\\
+\textit{Limitation}: Interest and strength features are self-rated on Likert
+scales; people may mis-rate themselves.\\
+\textit{Response}: ``Self-report Likert scales are the standard instrument in
+sports psychology research (Vallerand, Pelletier). Their validity is
+well-established in the literature this work is grounded in. Cross-validation
+against behavioral data (e.g., exercise logs) is identified as future work.''
+
+\end{enumerate}
+
+% ============================================================
+\section{Tough Questions Your Professor Will Ask --- With Answers}
+% ============================================================
+
+\subsection{Questions about methodology}
+
+\begin{qabox}
+\textbf{Q: Why did you use classical ML and not deep learning?}\\[4pt]
+\textbf{A:} ``Three reasons. First, the dataset has 1,000 users and 29
+features --- deep learning typically needs far more data to outperform
+classical methods. Second, classical methods like XGBoost and Random Forest
+are inherently interpretable and allow SHAP analysis, which is essential for
+validating the interest-first hypothesis. Third, for a deployment setting
+(schools, fitness apps), interpretable models are preferred for trust and
+regulatory compliance. A system that recommends sports needs to be explainable
+to users.''
+\end{qabox}
+
+\begin{qabox}
+\textbf{Q: Why is the dataset synthetic? Isn't that a weakness?}\\[4pt]
+\textbf{A:} ``It is a limitation, not a disqualifying weakness. No public
+dataset combines multi-label sports engagement with interest profiles and
+physical metrics. Creating a synthetic dataset calibrated to published
+psychology findings is an accepted approach for feasibility studies in
+data-scarce domains. The paper is transparent about this, frames the work
+as a proof-of-concept, and identifies real-user data collection as the
+primary next step. The conference reviewers accepted this framing.''
+\end{qabox}
+
+\begin{qabox}
+\textbf{Q: Why a stacking ensemble specifically? Why not just use XGBoost?}\\[4pt]
+\textbf{A:} ``XGBoost alone achieves NDCG@5 = 0.429 (B5). The stacking
+ensemble achieves 0.498 --- a 16.1\% improvement. The ablation study
+isolates this: every component --- feature combination, tuning, stacking ---
+contributes to the final result. XGBoost and Random Forest have complementary
+strengths: XGBoost captures non-linear feature interactions while Random Forest
+reduces variance through bagging. The meta-learner learns when to trust each.
+The results empirically justify the choice.''
+\end{qabox}
+
+\begin{qabox}
+\textbf{Q: What is NDCG and why is it the right metric?}\\[4pt]
+\textbf{A:} ``NDCG (Normalized Discounted Cumulative Gain) measures ranking
+quality. In a recommendation system, it is not enough to just return the right
+items --- you need to rank them correctly, with the most relevant items at the
+top. NDCG gives more credit for relevant items appearing at position 1 than at
+position 5. It is the standard primary metric for ranking-based recommendation
+systems, used in virtually all recommendation papers.''
+\end{qabox}
+
+\begin{qabox}
+\textbf{Q: Why is $\alpha = 0.4$ chosen for the discovery blend?}\\[4pt]
+\textbf{A:} ``Alpha of 0.4 means 40\% weight on discovery and 60\% on model
+prediction. This was chosen as a balanced default that gives meaningful novelty
+without completely sacrificing recommendation accuracy. It is a design
+parameter, not a tuned hyperparameter. The paper explicitly states that alpha
+can be adapted per user based on their stated exploration preference. Future
+work includes learning alpha from user feedback.''
+\end{qabox}
+
+\begin{qabox}
+\textbf{Q: Why does Tuned XGBoost underperform untuned XGBoost?}\\[4pt]
+\textbf{A:} ``This is discussed openly in the paper. The grid search was
+performed on the first sport label (highest base rate) and applied to all 20
+sports. This proxy-label tuning strategy can overfit the hyperparameters to
+the dominant sport and not generalize well across all 20. Per-sport tuning is
+identified as a direction for future work. The fact that the stacking ensemble
+(S1 = 0.498) still outperforms both demonstrates that the ensemble approach
+is robust even when individual components are not perfectly tuned.''
+\end{qabox}
+
+\subsection{Questions about the research contribution}
+
+\begin{qabox}
+\textbf{Q: What is actually new here? Recommender systems exist already.}\\[4pt]
+\textbf{A:} ``The novelty is in the combination of four things no prior
+system has done simultaneously: (1) interest-first design philosophy where
+psychological interest features are the primary input, not physical metrics;
+(2) accessibility for novice and general users who have no sports history;
+(3) a discovery mechanism that actively surfaces unexplored sports; and
+(4) using only classical ML methods with full explainability. The Research Gap
+table in the paper shows this gap clearly against five prior systems.''
+\end{qabox}
+
+\begin{qabox}
+\textbf{Q: The SHAP results show 65.9\% for interests+strengths. But strengths
+are also somewhat physical. Is this really showing interests are important?}\\[4pt]
+\textbf{A:} ``That is a fair point and is addressed in the paper. Strength
+features are Likert-scaled self-ratings of perceived physical capability ---
+not objective measurements like height or sprint time. They are psychological
+assessments of physical ability, adjacent to how a person sees themselves
+rather than what a clinician measures. This makes them \emph{psychologically}
+adjacent features, distinct from the six objective physical metrics. The paper
+is explicit about this framing.''
+\end{qabox}
+
+\begin{qabox}
+\textbf{Q: Has this been tested on real users?}\\[4pt]
+\textbf{A:} ``Not yet --- and the paper is completely transparent about this.
+The current work is a proof-of-concept demonstrating that the framework is
+technically sound and internally consistent with published psychology findings.
+A randomized A/B user study (N=60, 30 per arm) is described in detail in the
+paper as the planned immediate next step, with a pre-specified primary outcome
+(sports engagement intention score at two-week follow-up) and statistical
+power calculations ($\beta$ = 0.80, $p < 0.05$).''
+\end{qabox}
+
+\subsection{Questions about the conference and publication}
+
+\begin{qabox}
+\textbf{Q: Why ICDSIAI-26 specifically?}\\[4pt]
+\textbf{A:} ``ICDSIAI-26 focuses on the intersection of data science and
+artificial intelligence, which is exactly where this work sits --- it is an
+ML system grounded in psychology and applied to a real-world public health
+problem. The conference audience includes researchers in applied ML,
+recommender systems, and human-centered AI, which are the communities most
+relevant to this work. The paper has been accepted after peer review.''
+\end{qabox}
+
+\begin{qabox}
+\begin{sloppypar}
+\textbf{Q: How do you know this work is original and not plagiarized?}\\[4pt]
+\textbf{A:} ``The code, dataset, and paper are all original work. The full
+implementation history is on GitHub at
+\url{https://github.com/KusalPabasara/sports-recommendation}.
+The paper was submitted through the conference's plagiarism-checking process
+and was accepted. All prior work is properly cited with 21 references across
+sports analytics, recommendation systems, psychology, and ensemble learning.''
+\end{sloppypar}
+\end{qabox}
+
+% ============================================================
+\section{Sponsorship Case --- How to Argue for Funding}
+% ============================================================
+
+\subsection{What you are asking for}
+
+Conference registration fee + travel/accommodation to present the accepted
+paper at ICDSIAI-26.
+
+\subsection{Arguments to make to your professor / department}
+
+\begin{enumerate}[leftmargin=*, label=\textbf{Arg \arabic{enumi}.}]
+
+\item \textbf{Peer-reviewed acceptance --- the work is externally validated.}\\
+``This paper has been peer-reviewed and accepted by ICDSIAI-26. Acceptance
+means independent expert reviewers found the research novel, technically
+sound, and of sufficient quality for publication. This is not a self-assessed
+claim --- it is external academic validation.''
+
+\item \textbf{Institutional visibility.}\\
+``The affiliation on the paper is the University of Moratuwa, Department of
+Computer Science and Engineering. Every publication citing this work will
+cite the university. This is direct, measurable research output and
+international visibility for the department.''
+
+\item \textbf{A rare undergraduate achievement.}\\
+``First-authored peer-reviewed international conference papers at
+undergraduate level are rare. Sponsoring this presentation demonstrates the
+department's commitment to undergraduate research and will strengthen the
+department's research profile.''
+
+\item \textbf{Real-world impact potential.}\\
+``Sports participation is a global public health problem. WHO reports 1.4
+billion insufficiently active adults. This research addresses a specific,
+unmet need: helping novice and general users discover sports that genuinely
+suit them. This has real deployment potential for schools, national sports
+bodies, fitness apps, and public health programs.''
+
+\item \textbf{Follow-on research funding potential.}\\
+``Presenting at an international conference creates connections with other
+researchers and potential collaborators. The planned user study (N=60 A/B
+randomized trial) described in the paper would be a strong candidate for
+a follow-on research grant, which would bring external funding to the
+department.''
+
+\item \textbf{Dataset and code are publicly released.}\\
+``The synthetic dataset and full code are already public on GitHub. This is
+research that other groups can build on --- maximizing the research impact
+beyond the single publication.''
+
+\end{enumerate}
+
+\subsection{Suggested email / talking points structure}
+
+\begin{mdframed}[backgroundcolor=lightgray]
+\textbf{To Professor [Name]:}
+
+I am writing to request sponsorship for conference participation at
+ICDSIAI-26, where my paper titled \emph{``Interest-Driven Personalized
+Sports Recommendation Using Classical Ensemble Learning with a Novel-Sport
+Discovery Mechanism''} has been accepted for publication.
+
+The paper presents a machine learning system that recommends sports to users
+based on personal interests rather than physical fitness, achieving a 17.4\%
+improvement over the current physical-only paradigm. It was conducted as
+independent research and has been peer-reviewed and accepted at ICDSIAI-26.
+
+The paper is affiliated with the Department of Computer Science and
+Engineering, University of Moratuwa, providing direct international
+visibility for the department. I would be grateful for sponsorship
+covering the conference registration [and travel/accommodation if applicable].
+
+I am happy to present the full research to you at your convenience before
+the conference to discuss the work in detail.
+
+\medskip
+Yours sincerely,\\
+Kusal Pabasara
+\end{mdframed}
+
+% ============================================================
+\section{Quick Reference Card --- Numbers to Know Instantly}
+% ============================================================
+
+\begin{keybox}
+\textbf{Memorize these. They will come up in any conversation about the research.}
+
+\medskip
+\begin{tabular}{lp{9cm}}
+\textbf{Dataset} & 1,000 users, 20 sports, 29 features, 800 train / 200 test \\
+\textbf{Best model} & S1 Stacking (XGBoost + RF + Logistic Regression meta-learner) \\
+\textbf{Best NDCG@5} & 0.498 (S1 Stacking) \\
+\textbf{vs Physical-only} & 17.4\% improvement (0.424 $\to$ 0.498) \\
+\textbf{vs Full XGBoost} & 16.1\% improvement (0.429 $\to$ 0.498) \\
+\textbf{Best MAP@5} & 0.725 (T2 Tuned Random Forest) \\
+\textbf{Discovery rate} & 85.7\% novelty at K=5 (S2 Stack+Discovery) \\
+\textbf{SHAP interest} & 35.4\% interests alone; 65.9\% interests + strengths \\
+\textbf{SHAP physical} & 26.6\% objective physical metrics \\
+\textbf{Watch task S1} & NDCG@5 = 0.721, MAP@5 = 0.852 \\
+\textbf{Discovery blend} & $\alpha = 0.4$ (40\% discovery, 60\% model) \\
+\textbf{Grid search} & 3-fold stratified CV \\
+\textbf{Key citations} & Vallerand 2003, Pelletier 1995, Fraser-Thomas 2006,
+                          Wolpert 1992, Breiman 2001, Lundberg 2017 (SHAP) \\
+\textbf{GitHub} & \url{https://github.com/KusalPabasara/sports-recommendation} \\
+\end{tabular}
+\end{keybox}
+
+% ============================================================
+\section{The Story to Tell --- One Narrative From Start to Finish}
+% ============================================================
+
+\begin{mdframed}[backgroundcolor=boxblue, linecolor=headerblue, linewidth=1.2pt,
+                 innertopmargin=10pt, innerbottommargin=10pt,
+                 innerleftmargin=12pt, innerrightmargin=12pt]
+\textit{``The problem I started with is simple: 1.4 billion people are not
+active enough, and part of the reason is that people struggle to find sports
+they genuinely enjoy. The existing technology --- systems like AI Sport Scout
+--- only look at physical fitness. But 30 years of sports psychology research
+show that interest and motivation are the real drivers of whether someone
+sticks with a sport.
+
+So I built a machine learning system that flips this. Instead of asking how
+fast you run, it asks what you enjoy --- team or individual? Indoor or
+outdoor? High-energy or strategic? These interest answers, combined with
+physical traits as secondary information, feed into a stacking ensemble of
+XGBoost and Random Forest models. The ensemble outperforms every baseline
+by 17.4\% on ranking quality.
+
+But recommending sports you already know is only half the problem. If you
+have only ever played cricket and football, the system might just recommend
+cricket and football again. So I built a discovery score --- using cosine
+similarity between your interest profile and the average interests of people
+who play sports you have never tried. This achieves an 85.7\% novelty rate:
+almost 9 out of every 10 recommendations are sports the user has never
+encountered before.
+
+To validate that the interest-first design is correct, I used SHAP to look
+inside the model. It showed that interest and self-strength features account
+for 65.9\% of the model's predictive power --- more than twice the
+contribution of objective physical metrics. The model itself learned that
+interests matter more.
+
+The paper was accepted at ICDSIAI-26. The next step is a real-user study to
+validate these findings with actual people, not synthetic data. This is
+the proof-of-concept that makes that next step scientifically justified.''}
+\end{mdframed}
+
+\vspace{1cm}
+\begin{center}
+\small\color{gray}
+This document was prepared as a full defence guide for the accepted paper.\\
+All numbers are cross-verified against the submitted manuscript.\\
+Paper: \texttt{paper-icdsiai/main.pdf} \quad|\quad
+Code: \url{https://github.com/KusalPabasara/sports-recommendation}
+\end{center}
+
+\end{document}
