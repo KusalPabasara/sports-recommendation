@@ -90,174 +90,212 @@ export default function Questionnaire({ onResults, onBack }: QuestionnaireProps)
     }
   };
 
+  const stepTitles = ['Your Interests', 'Self-Rated Strengths', 'Physical Profile', 'Demographics'];
+  const stepSubtitles = [
+    'Rate your preferences on each dimension (I = lowest, V = highest)',
+    'How would you honestly rate your own athletic abilities?',
+    'Enter your approximate physical measurements',
+    'Final details to personalise your results',
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 py-8 px-4">
+    <div className="deco-bg min-h-screen py-10 px-4" style={{ color: 'var(--cream)' }}>
       <div className="max-w-xl mx-auto">
         <button
           onClick={onBack}
-          className="flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 mb-4 cursor-pointer"
+          className="flex items-center gap-2 text-xs tracking-widest uppercase mb-8 cursor-pointer transition-all duration-300"
+          style={{ color: 'var(--pewter)', background: 'none', border: 'none' }}
+          onMouseEnter={e => (e.currentTarget.style.color = 'var(--gold)')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'var(--pewter)')}
         >
-          <ArrowLeft size={14} /> Back to home
+          <ArrowLeft size={13} /> Return to Home
         </button>
 
         <StepProgress steps={STEPS} current={step} />
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+        {/* Main card */}
+        <div
+          className="deco-corners p-7 md:p-10"
+          style={{
+            background: 'var(--charcoal)',
+            border: '1px solid rgba(212,175,55,0.3)',
+          }}
+        >
+          {/* Section header */}
+          <div
+            className="pb-5 mb-7"
+            style={{ borderBottom: '1px solid rgba(212,175,55,0.15)' }}
+          >
+            <h2
+              className="font-display uppercase tracking-widest mb-1"
+              style={{ color: 'var(--gold)', fontSize: '1.1rem', letterSpacing: '0.18em' }}
+            >
+              {stepTitles[step]}
+            </h2>
+            <p className="text-xs tracking-wide" style={{ color: 'var(--pewter)' }}>
+              {stepSubtitles[step]}
+            </p>
+          </div>
+
           {step === 0 && (
             <div>
-              <h2 className="text-xl font-bold text-gray-800 mb-1">Your Interests</h2>
-              <p className="text-sm text-gray-400 mb-6">Rate your preferences on each dimension</p>
               {INTEREST_FIELDS.map((f) => (
-                <LikertSlider
-                  key={f.key}
-                  label={f.label}
-                  value={features[f.key] as number}
-                  onChange={(v) => set(f.key, v)}
-                  low={f.low}
-                  high={f.high}
-                />
+                <LikertSlider key={f.key} label={f.label} value={features[f.key] as number} onChange={(v) => set(f.key, v)} low={f.low} high={f.high} />
               ))}
             </div>
           )}
 
           {step === 1 && (
             <div>
-              <h2 className="text-xl font-bold text-gray-800 mb-1">Self-Rated Strengths</h2>
-              <p className="text-sm text-gray-400 mb-6">How would you rate yourself? (1 = Low, 5 = High)</p>
               {STRENGTH_FIELDS.map((f) => (
-                <LikertSlider
-                  key={f.key}
-                  label={f.label}
-                  value={features[f.key] as number}
-                  onChange={(v) => set(f.key, v)}
-                  low="Low"
-                  high="High"
-                />
+                <LikertSlider key={f.key} label={f.label} value={features[f.key] as number} onChange={(v) => set(f.key, v)} low="Low" high="High" />
               ))}
             </div>
           )}
 
           {step === 2 && (
-            <div>
-              <h2 className="text-xl font-bold text-gray-800 mb-1">Physical Profile</h2>
-              <p className="text-sm text-gray-400 mb-6">Enter your approximate physical info</p>
-              <div className="grid grid-cols-2 gap-4">
-                <NumberInput label="Age" value={features.age} onChange={(v) => set('age', v)} unit="years" />
-                <NumberInput label="Height" value={features.height_cm} onChange={(v) => set('height_cm', v)} unit="cm" />
-                <NumberInput label="Weight" value={features.weight_kg} onChange={(v) => set('weight_kg', v)} unit="kg" />
-                <NumberInput label="100m Sprint" value={features.sprint_100m_s} onChange={(v) => set('sprint_100m_s', v)} unit="seconds" />
-                <NumberInput label="Standing Jump" value={features.jump_cm} onChange={(v) => set('jump_cm', v)} unit="cm" />
-              </div>
+            <div className="grid grid-cols-2 gap-5">
+              <NumberInput label="Age" value={features.age} onChange={(v) => set('age', v)} unit="years" />
+              <NumberInput label="Height" value={features.height_cm} onChange={(v) => set('height_cm', v)} unit="cm" />
+              <NumberInput label="Weight" value={features.weight_kg} onChange={(v) => set('weight_kg', v)} unit="kg" />
+              <NumberInput label="100m Sprint" value={features.sprint_100m_s} onChange={(v) => set('sprint_100m_s', v)} unit="sec" />
+              <NumberInput label="Standing Jump" value={features.jump_cm} onChange={(v) => set('jump_cm', v)} unit="cm" />
             </div>
           )}
 
           {step === 3 && (
             <div>
-              <h2 className="text-xl font-bold text-gray-800 mb-1">Demographics & Sports History</h2>
-              <p className="text-sm text-gray-400 mb-6">Final details for personalized results</p>
-
-              <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
-              <div className="flex gap-2 mb-5">
+              <p className="text-[10px] tracking-widest uppercase mb-2" style={{ color: 'var(--pewter)' }}>Gender</p>
+              <div className="flex gap-2 mb-7">
                 {GENDERS.map((g) => (
                   <button
                     key={g.value}
                     onClick={() => set('gender', g.value)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium border cursor-pointer transition ${
-                      features.gender === g.value
-                        ? 'bg-indigo-600 text-white border-indigo-600'
-                        : 'bg-white text-gray-600 border-gray-200 hover:border-indigo-300'
-                    }`}
-                  >
-                    {g.label}
-                  </button>
+                    className="px-4 py-2 text-xs tracking-widest uppercase cursor-pointer transition-all duration-300"
+                    style={{
+                      border: features.gender === g.value ? '1px solid var(--gold)' : '1px solid rgba(212,175,55,0.25)',
+                      color: features.gender === g.value ? 'var(--obsidian)' : 'var(--pewter)',
+                      background: features.gender === g.value ? 'var(--gold)' : 'transparent',
+                    }}
+                  >{g.label}</button>
                 ))}
               </div>
 
-              <label className="block text-sm font-medium text-gray-700 mb-1">Region</label>
-              <div className="flex flex-wrap gap-2 mb-5">
+              <p className="text-[10px] tracking-widest uppercase mb-2" style={{ color: 'var(--pewter)' }}>Region</p>
+              <div className="flex flex-wrap gap-2 mb-7">
                 {REGIONS.map((r) => (
                   <button
                     key={r.value}
                     onClick={() => set('region', r.value)}
-                    className={`px-3 py-1.5 rounded-lg text-sm border cursor-pointer transition ${
-                      features.region === r.value
-                        ? 'bg-indigo-600 text-white border-indigo-600'
-                        : 'bg-white text-gray-600 border-gray-200 hover:border-indigo-300'
-                    }`}
-                  >
-                    {r.label}
-                  </button>
+                    className="px-3 py-1.5 text-[10px] tracking-widest uppercase cursor-pointer transition-all duration-300"
+                    style={{
+                      border: features.region === r.value ? '1px solid var(--gold)' : '1px solid rgba(212,175,55,0.25)',
+                      color: features.region === r.value ? 'var(--obsidian)' : 'var(--pewter)',
+                      background: features.region === r.value ? 'var(--gold)' : 'transparent',
+                    }}
+                  >{r.label}</button>
                 ))}
               </div>
 
-              <LikertSlider
-                label="Facility Access"
-                value={features.facility_access}
-                onChange={(v) => set('facility_access', v)}
-                low="No access"
-                high="Full gym"
-              />
+              <LikertSlider label="Facility Access" value={features.facility_access} onChange={(v) => set('facility_access', v)} low="No access" high="Full gym" />
 
-              <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
-                Sports you've already tried <span className="text-gray-400 font-normal">(optional)</span>
-              </label>
-              <div className="flex flex-wrap gap-2 mb-2">
-                {SPORTS_LIST.map((s) => (
-                  <button
-                    key={s.id}
-                    onClick={() => toggleTried(s.id)}
-                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border cursor-pointer transition ${
-                      triedSports.includes(s.id)
-                        ? 'bg-indigo-100 text-indigo-700 border-indigo-300'
-                        : 'bg-gray-50 text-gray-500 border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    {SPORT_ICONS[s.id]} {s.name}
-                  </button>
-                ))}
+              <div className="mt-7">
+                <p className="text-[10px] tracking-widest uppercase mb-1" style={{ color: 'var(--pewter)' }}>
+                  Sports already tried <span style={{ opacity: 0.5 }}>(optional)</span>
+                </p>
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {SPORTS_LIST.map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => toggleTried(s.id)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] tracking-wider uppercase cursor-pointer transition-all duration-300"
+                      style={{
+                        border: triedSports.includes(s.id) ? '1px solid var(--gold)' : '1px solid rgba(212,175,55,0.2)',
+                        color: triedSports.includes(s.id) ? 'var(--gold)' : 'rgba(212,175,55,0.35)',
+                        background: triedSports.includes(s.id) ? 'rgba(212,175,55,0.1)' : 'transparent',
+                      }}
+                    >
+                      {SPORT_ICONS[s.id]} {s.name}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           )}
 
           {error && (
-            <div className="mt-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">
+            <div
+              className="mt-5 text-xs tracking-wide p-3"
+              style={{
+                border: '1px solid rgba(255,80,80,0.4)',
+                color: '#ff8080',
+                background: 'rgba(255,80,80,0.06)',
+              }}
+            >
               {error}
             </div>
           )}
 
           {/* Navigation */}
-          <div className="flex justify-between mt-8">
+          <div
+            className="flex justify-between items-center mt-8 pt-7"
+            style={{ borderTop: '1px solid rgba(212,175,55,0.15)' }}
+          >
             <button
               onClick={() => setStep((s) => s - 1)}
               disabled={!canPrev}
-              className={`flex items-center gap-1 px-5 py-2.5 rounded-xl text-sm font-medium cursor-pointer transition ${
-                canPrev ? 'text-gray-600 hover:bg-gray-100' : 'text-gray-300 cursor-not-allowed'
-              }`}
+              className="flex items-center gap-2 text-xs tracking-widest uppercase px-5 py-3 cursor-pointer transition-all duration-300"
+              style={{
+                border: canPrev ? '1px solid rgba(212,175,55,0.35)' : '1px solid rgba(212,175,55,0.1)',
+                color: canPrev ? 'var(--pewter)' : 'rgba(212,175,55,0.2)',
+                background: 'transparent',
+                cursor: canPrev ? 'pointer' : 'not-allowed',
+              }}
             >
-              <ArrowLeft size={16} /> Back
+              <ArrowLeft size={13} /> Back
             </button>
 
             {canNext ? (
               <button
                 onClick={() => setStep((s) => s + 1)}
-                className="flex items-center gap-1 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl text-sm font-semibold shadow-sm cursor-pointer transition"
+                className="flex items-center gap-2 text-xs tracking-widest uppercase px-7 py-3 cursor-pointer transition-all duration-500"
+                style={{ border: '1px solid var(--gold)', color: 'var(--gold)', background: 'transparent' }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = 'var(--gold)';
+                  e.currentTarget.style.color = 'var(--obsidian)';
+                  e.currentTarget.style.boxShadow = '0 0 20px rgba(212,175,55,0.4)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = 'var(--gold)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
               >
-                Next <ArrowRight size={16} />
+                Continue <ArrowRight size={13} />
               </button>
             ) : (
               <button
                 onClick={submit}
                 disabled={loading}
-                className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl text-sm font-semibold shadow-sm cursor-pointer transition disabled:opacity-50"
+                className="flex items-center gap-2 text-xs tracking-widest uppercase px-7 py-3 cursor-pointer transition-all duration-500 disabled:opacity-40"
+                style={{ border: '1px solid var(--gold)', color: 'var(--gold)', background: 'transparent' }}
+                onMouseEnter={e => {
+                  if (!loading) {
+                    e.currentTarget.style.background = 'var(--gold)';
+                    e.currentTarget.style.color = 'var(--obsidian)';
+                    e.currentTarget.style.boxShadow = '0 0 20px rgba(212,175,55,0.4)';
+                  }
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = 'var(--gold)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
               >
                 {loading ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin" /> Analyzing...
-                  </>
+                  <><Loader2 size={13} className="animate-spin" /> Analysing</>
                 ) : (
-                  <>
-                    <Send size={16} /> Get Recommendations
-                  </>
+                  <><Send size={13} /> Reveal Results</>
                 )}
               </button>
             )}
@@ -268,28 +306,34 @@ export default function Questionnaire({ onResults, onBack }: QuestionnaireProps)
   );
 }
 
-function NumberInput({
-  label,
-  value,
-  onChange,
-  unit,
-}: {
-  label: string;
-  value: number;
-  onChange: (v: number) => void;
-  unit: string;
-}) {
+function NumberInput({ label, value, onChange, unit }: { label: string; value: number; onChange: (v: number) => void; unit: string }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-      <div className="relative">
+      <label
+        className="block text-[10px] tracking-widest uppercase mb-2"
+        style={{ color: 'var(--pewter)' }}
+      >
+        {label}
+      </label>
+      <div className="relative h-12 flex items-center" style={{ borderBottom: '2px solid var(--gold)' }}>
         <input
           type="number"
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
-          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 outline-none"
+          className="w-full h-full outline-none text-sm pr-10"
+          style={{
+            background: 'transparent',
+            color: 'var(--cream)',
+            border: 'none',
+            fontFamily: 'Josefin Sans, sans-serif',
+          }}
         />
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">{unit}</span>
+        <span
+          className="absolute right-0 text-[10px] tracking-widest uppercase"
+          style={{ color: 'rgba(212,175,55,0.5)' }}
+        >
+          {unit}
+        </span>
       </div>
     </div>
   );
