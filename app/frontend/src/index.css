@@ -1,8 +1,124 @@
 @import "tailwindcss";
 
+/* ─── Art Deco Design Tokens ─────────────────────────────────── */
+:root {
+  --gold:        #D4AF37;
+  --gold-light:  #F2E8C4;
+  --obsidian:    #0A0A0A;
+  --charcoal:    #141414;
+  --charcoal-2:  #1C1C1C;
+  --cream:       #F2F0E4;
+  --pewter:      #888888;
+  --midnight:    #1E3D59;
+  --glow-gold:   rgba(212, 175, 55, 0.25);
+  --glow-strong: rgba(212, 175, 55, 0.45);
+}
+
+/* ─── Base Reset ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
 body {
   margin: 0;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--obsidian);
+  color: var(--cream);
+  font-family: 'Josefin Sans', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* ─── Diagonal crosshatch background texture ─────────────────── */
+.deco-bg {
+  background-color: var(--obsidian);
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 28px,
+      rgba(212,175,55,0.035) 28px,
+      rgba(212,175,55,0.035) 29px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 28px,
+      rgba(212,175,55,0.035) 28px,
+      rgba(212,175,55,0.035) 29px
+    );
+}
+
+/* ─── Display / Heading font ─────────────────────────────────── */
+.font-display { font-family: 'Marcellus', serif; }
+.font-body    { font-family: 'Josefin Sans', sans-serif; }
+
+/* ─── Gold glow utility ──────────────────────────────────────── */
+.glow-gold  { box-shadow: 0 0 18px var(--glow-gold); }
+.glow-strong { box-shadow: 0 0 28px var(--glow-strong); }
+
+/* ─── Art Deco card corner brackets ─────────────────────────── */
+.deco-corners {
+  position: relative;
+}
+.deco-corners::before,
+.deco-corners::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: var(--gold);
+  border-style: solid;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+.deco-corners::before {
+  top: 6px; left: 6px;
+  border-width: 2px 0 0 2px;
+}
+.deco-corners::after {
+  bottom: 6px; right: 6px;
+  border-width: 0 2px 2px 0;
+}
+.deco-corners:hover::before,
+.deco-corners:hover::after {
+  opacity: 1;
+}
+
+/* ─── Custom range slider (Art Deco gold) ────────────────────── */
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 2px;
+  background: rgba(212,175,55,0.25);
+  outline: none;
+  cursor: pointer;
+}
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: var(--gold);
+  border: 2px solid var(--obsidian);
+  box-shadow: 0 0 8px var(--glow-gold);
+  cursor: pointer;
+  transform: rotate(45deg);
+}
+input[type='range']::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: var(--gold);
+  border: 2px solid var(--obsidian);
+  box-shadow: 0 0 8px var(--glow-gold);
+  cursor: pointer;
+  transform: rotate(45deg);
+  border-radius: 0;
+}
+input[type='range']:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 14px var(--glow-strong);
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--charcoal); }
+::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.4); }
+::-webkit-scrollbar-thumb:hover { background: var(--gold); }
