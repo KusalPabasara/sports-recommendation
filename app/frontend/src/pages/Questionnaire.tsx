@@ -306,7 +306,16 @@ export default function Questionnaire({ onResults, onBack }: QuestionnaireProps)
   );
 }
 
+const NUMBER_CONSTRAINTS: Record<string, { min: number; max: number; step?: number }> = {
+  Age:           { min: 10,  max: 80  },
+  Height:        { min: 100, max: 230 },
+  Weight:        { min: 30,  max: 200 },
+  '100m Sprint': { min: 9,   max: 30, step: 0.1 },
+  'Standing Jump': { min: 10, max: 120 },
+};
+
 function NumberInput({ label, value, onChange, unit }: { label: string; value: number; onChange: (v: number) => void; unit: string }) {
+  const constraints = NUMBER_CONSTRAINTS[label] ?? { min: 0, max: 9999 };
   return (
     <div>
       <label
@@ -319,7 +328,14 @@ function NumberInput({ label, value, onChange, unit }: { label: string; value: n
         <input
           type="number"
           value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
+          min={constraints.min}
+          max={constraints.max}
+          step={constraints.step ?? 1}
+          onChange={(e) => {
+            const raw = Number(e.target.value);
+            const clamped = Math.min(constraints.max, Math.max(constraints.min, raw));
+            onChange(isNaN(raw) ? constraints.min : clamped);
+          }}
           className="w-full h-full outline-none text-sm pr-10"
           style={{
             background: 'transparent',

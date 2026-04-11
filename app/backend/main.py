@@ -29,6 +29,8 @@ from app.backend.schemas import (
     SportRecommendation,
     UserFeatures,
 )
+from fastapi.exceptions import RequestValidationError
+
 from app.backend.inference import model_server
 
 
@@ -60,6 +62,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error_handler(request: Request, exc: RequestValidationError):
+    logger.warning("Validation error: %s", exc.errors())
+    return JSONResponse(
+        status_code=422,
+        content={"detail": "Invalid input values", "errors": exc.errors()},
+    )
 
 
 @app.get("/api/health")
