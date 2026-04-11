@@ -1,4 +1,4 @@
-import { Check } from 'lucide-react';
+const ROMAN = ['I', 'II', 'III', 'IV'];
 
 interface StepProgressProps {
   steps: string[];
@@ -7,37 +7,56 @@ interface StepProgressProps {
 
 export default function StepProgress({ steps, current }: StepProgressProps) {
   return (
-    <div className="flex items-center justify-center gap-0 mb-8">
+    <div className="flex items-center justify-center mb-10">
       {steps.map((label, i) => {
         const done = i < current;
         const active = i === current;
         return (
           <div key={i} className="flex items-center">
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center" style={{ minWidth: 56 }}>
+              {/* Diamond node */}
               <div
-                className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
-                  done
-                    ? 'bg-indigo-600 text-white'
+                className="w-9 h-9 flex items-center justify-center transition-all duration-500"
+                style={{
+                  transform: 'rotate(45deg)',
+                  border: done || active ? '2px solid var(--gold)' : '1px solid rgba(212,175,55,0.3)',
+                  background: done
+                    ? 'var(--gold)'
                     : active
-                    ? 'bg-indigo-100 text-indigo-700 ring-2 ring-indigo-500'
-                    : 'bg-gray-100 text-gray-400'
-                }`}
+                    ? 'rgba(212,175,55,0.12)'
+                    : 'transparent',
+                  boxShadow: active ? '0 0 14px rgba(212,175,55,0.35)' : 'none',
+                }}
               >
-                {done ? <Check size={18} /> : i + 1}
+                <span
+                  className="font-display"
+                  style={{
+                    transform: 'rotate(-45deg)',
+                    fontSize: 11,
+                    color: done ? 'var(--obsidian)' : active ? 'var(--gold)' : 'rgba(212,175,55,0.35)',
+                    fontWeight: 700,
+                    letterSpacing: '0.05em',
+                  }}
+                >
+                  {done ? '✓' : ROMAN[i]}
+                </span>
               </div>
               <span
-                className={`text-[11px] mt-1 whitespace-nowrap ${
-                  active ? 'text-indigo-700 font-semibold' : 'text-gray-400'
-                }`}
+                className="text-[10px] tracking-widest uppercase mt-2 whitespace-nowrap"
+                style={{
+                  color: active ? 'var(--gold)' : done ? 'rgba(212,175,55,0.6)' : 'rgba(212,175,55,0.3)',
+                }}
               >
                 {label}
               </span>
             </div>
             {i < steps.length - 1 && (
               <div
-                className={`w-12 h-0.5 mx-1 mt-[-14px] ${
-                  i < current ? 'bg-indigo-500' : 'bg-gray-200'
-                }`}
+                className="h-px mx-1 mb-5 transition-all duration-500"
+                style={{
+                  width: 32,
+                  background: i < current ? 'var(--gold)' : 'rgba(212,175,55,0.2)',
+                }}
               />
             )}
           </div>

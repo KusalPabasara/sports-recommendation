@@ -1,6 +1,5 @@
 import { SPORT_ICONS } from '../lib/sportIcons';
 import type { SportRecommendation } from '../lib/api';
-import { Sparkles } from 'lucide-react';
 
 interface SportCardProps {
   rec: SportRecommendation;
@@ -11,27 +10,65 @@ export default function SportCard({ rec }: SportCardProps) {
   const icon = SPORT_ICONS[rec.sport_id] || '🏅';
 
   return (
-    <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-      <div className="text-3xl w-10 text-center shrink-0">{icon}</div>
+    <div
+      className="deco-corners flex items-center gap-3 p-3 transition-all duration-300 group"
+      style={{
+        background: 'var(--charcoal)',
+        border: '1px solid rgba(212,175,55,0.25)',
+      }}
+    >
+      {/* Rotated diamond icon container */}
+      <div
+        className="shrink-0 w-10 h-10 flex items-center justify-center text-xl"
+        style={{
+          border: '1px solid rgba(212,175,55,0.4)',
+          transform: 'rotate(45deg)',
+          background: 'rgba(212,175,55,0.06)',
+        }}
+        aria-hidden="true"
+      >
+        <span style={{ transform: 'rotate(-45deg)', display: 'block' }}>{icon}</span>
+      </div>
+
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="font-semibold text-gray-800 text-sm truncate">
+        <div className="flex items-center gap-2 mb-1.5">
+          <span
+            className="text-xs tracking-widest uppercase truncate"
+            style={{ color: 'var(--cream)' }}
+          >
             {rec.sport_name}
           </span>
           {rec.is_discovery && (
-            <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full">
-              <Sparkles size={10} /> NEW
+            <span
+              className="text-[9px] tracking-widest uppercase px-1.5 py-0.5 shrink-0"
+              style={{
+                color: 'var(--gold)',
+                border: '1px solid var(--gold)',
+                background: 'rgba(212,175,55,0.1)',
+              }}
+            >
+              NEW
             </span>
           )}
         </div>
-        <div className="mt-1 w-full bg-gray-100 rounded-full h-2">
+        {/* Gold progress bar — no rounded corners */}
+        <div style={{ height: 2, background: 'rgba(212,175,55,0.15)' }}>
           <div
-            className="h-2 rounded-full bg-gradient-to-r from-indigo-500 to-cyan-400 transition-all duration-500"
-            style={{ width: `${pct}%` }}
+            className="transition-all duration-700"
+            style={{
+              height: '100%',
+              width: `${pct}%`,
+              background: 'linear-gradient(90deg, var(--gold), var(--gold-light))',
+              boxShadow: '0 0 6px rgba(212,175,55,0.4)',
+            }}
           />
         </div>
       </div>
-      <span className="text-sm font-bold text-indigo-600 w-12 text-right shrink-0">
+
+      <span
+        className="font-display text-sm w-10 text-right shrink-0"
+        style={{ color: 'var(--gold)' }}
+      >
         {pct}%
       </span>
     </div>
