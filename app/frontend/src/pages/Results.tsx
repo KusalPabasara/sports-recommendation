@@ -1,6 +1,8 @@
 import { ArrowLeft } from 'lucide-react';
 import SportCard from '../components/SportCard';
+import LangSwitcher from '../components/LangSwitcher';
 import type { RecommendResponse } from '../lib/api';
+import { useLang } from '../lib/LangContext';
 
 interface ResultsProps {
   data: RecommendResponse;
@@ -16,6 +18,7 @@ const IMPORTANCE_COLORS: Record<string, string> = {
 };
 
 export default function Results({ data, onRestart }: ResultsProps) {
+  const { t } = useLang();
   const importanceEntries = Object.entries(data.feature_importance).sort(
     (a, b) => b[1].percentage - a[1].percentage
   );
@@ -44,7 +47,7 @@ export default function Results({ data, onRestart }: ResultsProps) {
           onMouseEnter={e => (e.currentTarget.style.color = 'var(--gold)')}
           onMouseLeave={e => (e.currentTarget.style.color = 'var(--pewter)')}
         >
-          <ArrowLeft size={13} /> Retake Profile
+          <ArrowLeft size={13} /> {t.btn_retake}
         </button>
 
         {/* Page heading */}
@@ -53,7 +56,7 @@ export default function Results({ data, onRestart }: ResultsProps) {
             className="font-display uppercase mb-4"
             style={{ fontSize: 'clamp(1.6rem, 5vw, 2.8rem)', letterSpacing: '0.14em', color: 'var(--cream)' }}
           >
-            Your Recommendations
+            {t.results_heading}
           </h1>
           <div className="flex items-center justify-center gap-4" aria-hidden="true">
             <div className="h-px w-16" style={{ background: 'var(--gold)', opacity: 0.45 }} />
@@ -61,19 +64,22 @@ export default function Results({ data, onRestart }: ResultsProps) {
             <div className="h-px w-16" style={{ background: 'var(--gold)', opacity: 0.45 }} />
           </div>
           <p className="text-xs tracking-widest uppercase mt-4" style={{ color: 'var(--pewter)' }}>
-            Stacking Ensemble · XGBoost + Random Forest · SHAP-analysed
+            {t.results_subtitle}
           </p>
+          <div className="flex justify-center mt-4">
+            <LangSwitcher />
+          </div>
         </div>
 
         {/* Play + Watch grid */}
         <div className="grid md:grid-cols-2 gap-5 mb-5">
-          <ResultSection roman="I" title="To Play" subtitle="Best sports for active participation">
+          <ResultSection roman="I" title={t.results_play_title} subtitle={t.results_play_subtitle}>
             <div className="space-y-2">
               {data.play_recommendations.map((r) => <SportCard key={r.sport_id} rec={r} />)}
             </div>
           </ResultSection>
 
-          <ResultSection roman="II" title="To Watch" subtitle="Sports you'd love as a spectator">
+          <ResultSection roman="II" title={t.results_watch_title} subtitle={t.results_watch_subtitle}>
             <div className="space-y-2">
               {data.watch_recommendations.map((r) => <SportCard key={r.sport_id} rec={r} />)}
             </div>
@@ -82,7 +88,7 @@ export default function Results({ data, onRestart }: ResultsProps) {
 
         {/* Discovery — full width */}
         <div className="mb-5">
-          <ResultSection roman="III" title="Discover" subtitle="Sports you've never tried — but should (85.7% novelty rate)">
+          <ResultSection roman="III" title={t.results_discovery_title} subtitle={t.results_discovery_subtitle}>
             <div className="grid sm:grid-cols-2 gap-2">
               {data.discovery_recommendations.map((r) => (
                 <SportCard key={r.sport_id} rec={{ ...r, is_discovery: true }} />
@@ -112,11 +118,11 @@ export default function Results({ data, onRestart }: ResultsProps) {
               className="font-display text-sm tracking-widest uppercase"
               style={{ color: 'var(--gold)' }}
             >
-              What Drove Your Results
+              {t.results_importance_title}
             </h2>
           </div>
           <p className="text-[10px] tracking-wide mb-5 ml-9" style={{ color: 'var(--pewter)' }}>
-            Feature group importance from SHAP analysis — research paper Table V
+            {t.results_importance_subtitle}
           </p>
 
           {/* Segmented gold bar */}
@@ -150,7 +156,7 @@ export default function Results({ data, onRestart }: ResultsProps) {
                   aria-hidden="true"
                 />
                 <span className="text-[10px] tracking-widest uppercase" style={{ color: 'var(--pewter)' }}>
-                  {val.label}
+                  {t[`importance_${key}` as keyof typeof t] ?? val.label}
                 </span>
                 <span className="text-xs font-display" style={{ color: 'var(--gold)' }}>
                   {val.percentage}%
@@ -177,7 +183,7 @@ export default function Results({ data, onRestart }: ResultsProps) {
               e.currentTarget.style.boxShadow = 'none';
             }}
           >
-            Retake Profile
+            {t.btn_retake}
           </button>
 
           <div className="flex items-center justify-center gap-3 mt-8 mb-2" aria-hidden="true">
@@ -186,7 +192,7 @@ export default function Results({ data, onRestart }: ResultsProps) {
             <div className="h-px w-10" style={{ background: 'rgba(212,175,55,0.25)' }} />
           </div>
           <p className="text-[10px] tracking-widest uppercase" style={{ color: 'rgba(136,136,136,0.6)' }}>
-            Pabasara W.G.K. · University of Moratuwa · ICDSIAI-26
+            {t.footer_credit}
           </p>
         </div>
       </div>

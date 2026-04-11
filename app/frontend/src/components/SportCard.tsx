@@ -1,13 +1,16 @@
 import { SPORT_ICONS } from '../lib/sportIcons';
 import type { SportRecommendation } from '../lib/api';
+import { useLang } from '../lib/LangContext';
 
 interface SportCardProps {
   rec: SportRecommendation;
 }
 
 export default function SportCard({ rec }: SportCardProps) {
+  const { t } = useLang();
   const pct = Math.round(rec.score * 100);
   const icon = SPORT_ICONS[rec.sport_id] || '🏅';
+  const sportName = t[`sport_${rec.sport_id}` as keyof typeof t] ?? rec.sport_name;
 
   return (
     <div
@@ -36,7 +39,7 @@ export default function SportCard({ rec }: SportCardProps) {
             className="text-xs tracking-widest uppercase truncate"
             style={{ color: 'var(--cream)' }}
           >
-            {rec.sport_name}
+            {sportName}
           </span>
           {rec.is_discovery && (
             <span
@@ -47,7 +50,7 @@ export default function SportCard({ rec }: SportCardProps) {
                 background: 'rgba(212,175,55,0.1)',
               }}
             >
-              NEW
+              {t.badge_new}
             </span>
           )}
         </div>

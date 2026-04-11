@@ -2,55 +2,20 @@ import { useState } from 'react';
 import { ArrowLeft, ArrowRight, Send, Loader2 } from 'lucide-react';
 import StepProgress from '../components/StepProgress';
 import LikertSlider from '../components/LikertSlider';
+import LangSwitcher from '../components/LangSwitcher';
 import {
   type UserFeatures,
   type RecommendResponse,
   DEFAULT_FEATURES,
-  INTEREST_FIELDS,
-  STRENGTH_FIELDS,
   getRecommendations,
 } from '../lib/api';
 import { SPORT_ICONS } from '../lib/sportIcons';
+import { useLang } from '../lib/LangContext';
 
-const STEPS = ['Interests', 'Strengths', 'Physical', 'Demographics'];
 
-const GENDERS = [
-  { value: 'male', label: 'Male' },
-  { value: 'female', label: 'Female' },
-  { value: 'other', label: 'Other' },
-];
+const REGIONS = ['south_asia','east_asia','europe','americas','africa','oceania'] as const;
 
-const REGIONS = [
-  { value: 'south_asia', label: 'South Asia' },
-  { value: 'east_asia', label: 'East Asia' },
-  { value: 'europe', label: 'Europe' },
-  { value: 'americas', label: 'Americas' },
-  { value: 'africa', label: 'Africa' },
-  { value: 'oceania', label: 'Oceania' },
-];
-
-const SPORTS_LIST = [
-  { id: 'football_soccer', name: 'Football / Soccer' },
-  { id: 'cricket', name: 'Cricket' },
-  { id: 'basketball', name: 'Basketball' },
-  { id: 'tennis', name: 'Tennis' },
-  { id: 'badminton', name: 'Badminton' },
-  { id: 'table_tennis', name: 'Table Tennis' },
-  { id: 'volleyball', name: 'Volleyball' },
-  { id: 'swimming', name: 'Swimming' },
-  { id: 'athletics_track', name: 'Athletics / Track' },
-  { id: 'cycling', name: 'Cycling' },
-  { id: 'martial_arts', name: 'Martial Arts' },
-  { id: 'boxing', name: 'Boxing' },
-  { id: 'gymnastics', name: 'Gymnastics' },
-  { id: 'archery', name: 'Archery' },
-  { id: 'rock_climbing', name: 'Rock Climbing' },
-  { id: 'rugby', name: 'Rugby' },
-  { id: 'weightlifting', name: 'Weightlifting' },
-  { id: 'esports', name: 'Esports' },
-  { id: 'skateboarding', name: 'Skateboarding' },
-  { id: 'rowing', name: 'Rowing' },
-];
+const SPORT_IDS = ['football_soccer','cricket','basketball','tennis','badminton','table_tennis','volleyball','swimming','athletics_track','cycling','martial_arts','boxing','gymnastics','archery','rock_climbing','rugby','weightlifting','esports','skateboarding','rowing'] as const;
 
 interface QuestionnaireProps {
   onResults: (res: RecommendResponse) => void;
@@ -58,6 +23,8 @@ interface QuestionnaireProps {
 }
 
 export default function Questionnaire({ onResults, onBack }: QuestionnaireProps) {
+  const { t } = useLang();
+  const STEPS = [t.step_interests, t.step_strengths, t.step_physical, t.step_demographics];
   const [step, setStep] = useState(0);
   const [features, setFeatures] = useState<UserFeatures>({ ...DEFAULT_FEATURES });
   const [triedSports, setTriedSports] = useState<string[]>([]);
@@ -90,12 +57,12 @@ export default function Questionnaire({ onResults, onBack }: QuestionnaireProps)
     }
   };
 
-  const stepTitles = ['Your Interests', 'Self-Rated Strengths', 'Physical Profile', 'Demographics'];
+  const stepTitles = [t.step_interests, t.step_strengths, t.step_physical, t.step_demographics];
   const stepSubtitles = [
-    'Rate your preferences on each dimension (I = lowest, V = highest)',
-    'How would you honestly rate your own athletic abilities?',
-    'Enter your approximate physical measurements',
-    'Final details to personalise your results',
+    t.step_interests_subtitle,
+    t.step_strengths_subtitle,
+    t.step_physical_subtitle,
+    t.step_demographics_subtitle,
   ];
 
   return (
@@ -108,8 +75,11 @@ export default function Questionnaire({ onResults, onBack }: QuestionnaireProps)
           onMouseEnter={e => (e.currentTarget.style.color = 'var(--gold)')}
           onMouseLeave={e => (e.currentTarget.style.color = 'var(--pewter)')}
         >
-          <ArrowLeft size={13} /> Return to Home
+          <ArrowLeft size={13} /> {t.btn_return_home}
         </button>
+        <div className="flex justify-end mb-4">
+          <LangSwitcher />
+        </div>
 
         <StepProgress steps={STEPS} current={step} />
 
@@ -139,83 +109,98 @@ export default function Questionnaire({ onResults, onBack }: QuestionnaireProps)
 
           {step === 0 && (
             <div>
-              {INTEREST_FIELDS.map((f) => (
-                <LikertSlider key={f.key} label={f.label} value={features[f.key] as number} onChange={(v) => set(f.key, v)} low={f.low} high={f.high} />
-              ))}
+              <LikertSlider label={t.interest_team_vs_individual} value={features.interest_team_vs_individual} onChange={(v) => set('interest_team_vs_individual', v)} low={t.interest_team_vs_individual_low} high={t.interest_team_vs_individual_high} />
+              <LikertSlider label={t.interest_outdoor_preference} value={features.interest_outdoor_preference} onChange={(v) => set('interest_outdoor_preference', v)} low={t.interest_outdoor_preference_low} high={t.interest_outdoor_preference_high} />
+              <LikertSlider label={t.interest_competition_drive} value={features.interest_competition_drive} onChange={(v) => set('interest_competition_drive', v)} low={t.interest_competition_drive_low} high={t.interest_competition_drive_high} />
+              <LikertSlider label={t.interest_risk_tolerance} value={features.interest_risk_tolerance} onChange={(v) => set('interest_risk_tolerance', v)} low={t.interest_risk_tolerance_low} high={t.interest_risk_tolerance_high} />
+              <LikertSlider label={t.interest_creative_expression} value={features.interest_creative_expression} onChange={(v) => set('interest_creative_expression', v)} low={t.interest_creative_expression_low} high={t.interest_creative_expression_high} />
+              <LikertSlider label={t.interest_social_enjoyment} value={features.interest_social_enjoyment} onChange={(v) => set('interest_social_enjoyment', v)} low={t.interest_social_enjoyment_low} high={t.interest_social_enjoyment_high} />
+              <LikertSlider label={t.interest_endurance_interest} value={features.interest_endurance_interest} onChange={(v) => set('interest_endurance_interest', v)} low={t.pole_low} high={t.pole_high} />
+              <LikertSlider label={t.interest_power_interest} value={features.interest_power_interest} onChange={(v) => set('interest_power_interest', v)} low={t.pole_low} high={t.pole_high} />
+              <LikertSlider label={t.interest_speed_agility_interest} value={features.interest_speed_agility_interest} onChange={(v) => set('interest_speed_agility_interest', v)} low={t.pole_low} high={t.pole_high} />
+              <LikertSlider label={t.interest_spectator_engagement} value={features.interest_spectator_engagement} onChange={(v) => set('interest_spectator_engagement', v)} low={t.interest_spectator_engagement_low} high={t.interest_spectator_engagement_high} />
+              <LikertSlider label={t.interest_ambition_level} value={features.interest_ambition_level} onChange={(v) => set('interest_ambition_level', v)} low={t.interest_ambition_level_low} high={t.interest_ambition_level_high} />
+              <LikertSlider label={t.interest_strategy_preference} value={features.interest_strategy_preference} onChange={(v) => set('interest_strategy_preference', v)} low={t.interest_strategy_preference_low} high={t.interest_strategy_preference_high} />
             </div>
           )}
 
           {step === 1 && (
             <div>
-              {STRENGTH_FIELDS.map((f) => (
-                <LikertSlider key={f.key} label={f.label} value={features[f.key] as number} onChange={(v) => set(f.key, v)} low="Low" high="High" />
-              ))}
+              <LikertSlider label={t.strength_endurance} value={features.strength_endurance_self} onChange={(v) => set('strength_endurance_self', v)} low={t.pole_low} high={t.pole_high} />
+              <LikertSlider label={t.strength_strength} value={features.strength_strength_self} onChange={(v) => set('strength_strength_self', v)} low={t.pole_low} high={t.pole_high} />
+              <LikertSlider label={t.strength_speed} value={features.strength_speed_self} onChange={(v) => set('strength_speed_self', v)} low={t.pole_low} high={t.pole_high} />
+              <LikertSlider label={t.strength_flexibility} value={features.strength_flexibility_self} onChange={(v) => set('strength_flexibility_self', v)} low={t.pole_low} high={t.pole_high} />
+              <LikertSlider label={t.strength_coordination} value={features.strength_coordination_self} onChange={(v) => set('strength_coordination_self', v)} low={t.pole_low} high={t.pole_high} />
+              <LikertSlider label={t.strength_agility} value={features.strength_agility_self} onChange={(v) => set('strength_agility_self', v)} low={t.pole_low} high={t.pole_high} />
+              <LikertSlider label={t.strength_reaction_time} value={features.strength_reaction_time_self} onChange={(v) => set('strength_reaction_time_self', v)} low={t.pole_low} high={t.pole_high} />
+              <LikertSlider label={t.strength_strategy} value={features.strength_strategy_self} onChange={(v) => set('strength_strategy_self', v)} low={t.pole_low} high={t.pole_high} />
             </div>
           )}
 
           {step === 2 && (
             <div className="grid grid-cols-2 gap-5">
-              <NumberInput label="Age" value={features.age} onChange={(v) => set('age', v)} unit="years" />
-              <NumberInput label="Height" value={features.height_cm} onChange={(v) => set('height_cm', v)} unit="cm" />
-              <NumberInput label="Weight" value={features.weight_kg} onChange={(v) => set('weight_kg', v)} unit="kg" />
-              <NumberInput label="100m Sprint" value={features.sprint_100m_s} onChange={(v) => set('sprint_100m_s', v)} unit="sec" />
-              <NumberInput label="Standing Jump" value={features.jump_cm} onChange={(v) => set('jump_cm', v)} unit="cm" />
+              <NumberInput label={t.field_age} value={features.age} onChange={(v) => set('age', v)} unit={t.field_age_unit} min={10} max={80} />
+              <NumberInput label={t.field_height} value={features.height_cm} onChange={(v) => set('height_cm', v)} unit={t.field_height_unit} min={100} max={230} />
+              <NumberInput label={t.field_weight} value={features.weight_kg} onChange={(v) => set('weight_kg', v)} unit={t.field_weight_unit} min={30} max={200} />
+              <NumberInput label={t.field_sprint} value={features.sprint_100m_s} onChange={(v) => set('sprint_100m_s', v)} unit={t.field_sprint_unit} min={9} max={30} step={0.1} />
+              <NumberInput label={t.field_jump} value={features.jump_cm} onChange={(v) => set('jump_cm', v)} unit={t.field_jump_unit} min={10} max={120} />
             </div>
           )}
 
           {step === 3 && (
             <div>
-              <p className="text-[10px] tracking-widest uppercase mb-2" style={{ color: 'var(--pewter)' }}>Gender</p>
+              <p className="text-[10px] tracking-widest uppercase mb-2" style={{ color: 'var(--pewter)' }}>{t.label_gender}</p>
               <div className="flex gap-2 mb-7">
-                {GENDERS.map((g) => (
+                {(['male','female','other'] as const).map((g) => (
                   <button
-                    key={g.value}
-                    onClick={() => set('gender', g.value)}
+                    key={g}
+                    onClick={() => set('gender', g)}
                     className="px-4 py-2 text-xs tracking-widest uppercase cursor-pointer transition-all duration-300"
                     style={{
-                      border: features.gender === g.value ? '1px solid var(--gold)' : '1px solid rgba(212,175,55,0.25)',
-                      color: features.gender === g.value ? 'var(--obsidian)' : 'var(--pewter)',
-                      background: features.gender === g.value ? 'var(--gold)' : 'transparent',
+                      border: features.gender === g ? '1px solid var(--gold)' : '1px solid rgba(212,175,55,0.25)',
+                      color: features.gender === g ? 'var(--obsidian)' : 'var(--pewter)',
+                      background: features.gender === g ? 'var(--gold)' : 'transparent',
                     }}
-                  >{g.label}</button>
+                  >{t[`gender_${g}` as const]}</button>
                 ))}
               </div>
 
-              <p className="text-[10px] tracking-widest uppercase mb-2" style={{ color: 'var(--pewter)' }}>Region</p>
+              <p className="text-[10px] tracking-widest uppercase mb-2" style={{ color: 'var(--pewter)' }}>{t.label_region}</p>
               <div className="flex flex-wrap gap-2 mb-7">
                 {REGIONS.map((r) => (
                   <button
-                    key={r.value}
-                    onClick={() => set('region', r.value)}
+                    key={r}
+                    onClick={() => set('region', r)}
                     className="px-3 py-1.5 text-[10px] tracking-widest uppercase cursor-pointer transition-all duration-300"
                     style={{
-                      border: features.region === r.value ? '1px solid var(--gold)' : '1px solid rgba(212,175,55,0.25)',
-                      color: features.region === r.value ? 'var(--obsidian)' : 'var(--pewter)',
-                      background: features.region === r.value ? 'var(--gold)' : 'transparent',
+                      border: features.region === r ? '1px solid var(--gold)' : '1px solid rgba(212,175,55,0.25)',
+                      color: features.region === r ? 'var(--obsidian)' : 'var(--pewter)',
+                      background: features.region === r ? 'var(--gold)' : 'transparent',
                     }}
-                  >{r.label}</button>
+                  >{t[`region_${r}` as keyof typeof t]}</button>
                 ))}
               </div>
 
-              <LikertSlider label="Facility Access" value={features.facility_access} onChange={(v) => set('facility_access', v)} low="No access" high="Full gym" />
+              <LikertSlider label={t.label_facility} value={features.facility_access} onChange={(v) => set('facility_access', v)} low={t.facility_low} high={t.facility_high} />
 
               <div className="mt-7">
                 <p className="text-[10px] tracking-widest uppercase mb-1" style={{ color: 'var(--pewter)' }}>
-                  Sports already tried <span style={{ opacity: 0.5 }}>(optional)</span>
+                  {t.label_tried_sports} <span style={{ opacity: 0.5 }}>({t.tried_optional})</span>
                 </p>
                 <div className="flex flex-wrap gap-2 mt-3">
-                  {SPORTS_LIST.map((s) => (
+                  {SPORT_IDS.map((id) => (
                     <button
-                      key={s.id}
-                      onClick={() => toggleTried(s.id)}
+                      key={id}
+                      onClick={() => toggleTried(id)}
                       className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] tracking-wider uppercase cursor-pointer transition-all duration-300"
                       style={{
-                        border: triedSports.includes(s.id) ? '1px solid var(--gold)' : '1px solid rgba(212,175,55,0.2)',
-                        color: triedSports.includes(s.id) ? 'var(--gold)' : 'rgba(212,175,55,0.35)',
-                        background: triedSports.includes(s.id) ? 'rgba(212,175,55,0.1)' : 'transparent',
+                        border: triedSports.includes(id) ? '1px solid var(--gold)' : '1px solid rgba(212,175,55,0.2)',
+                        color: triedSports.includes(id) ? 'var(--gold)' : 'rgba(212,175,55,0.35)',
+                        background: triedSports.includes(id) ? 'rgba(212,175,55,0.1)' : 'transparent',
                       }}
                     >
-                      {SPORT_ICONS[s.id]} {s.name}
+                      {SPORT_ICONS[id] && <span>{SPORT_ICONS[id]}</span>}
+                      {t[`sport_${id}` as keyof typeof t]}
                     </button>
                   ))}
                 </div>
@@ -252,7 +237,7 @@ export default function Questionnaire({ onResults, onBack }: QuestionnaireProps)
                 cursor: canPrev ? 'pointer' : 'not-allowed',
               }}
             >
-              <ArrowLeft size={13} /> Back
+              <ArrowLeft size={13} /> {t.btn_back}
             </button>
 
             {canNext ? (
@@ -271,7 +256,7 @@ export default function Questionnaire({ onResults, onBack }: QuestionnaireProps)
                   e.currentTarget.style.boxShadow = 'none';
                 }}
               >
-                Continue <ArrowRight size={13} />
+                {t.btn_continue} <ArrowRight size={13} />
               </button>
             ) : (
               <button
@@ -293,9 +278,9 @@ export default function Questionnaire({ onResults, onBack }: QuestionnaireProps)
                 }}
               >
                 {loading ? (
-                  <><Loader2 size={13} className="animate-spin" /> Analysing</>
+                  <><Loader2 size={13} className="animate-spin" /> {t.btn_analysing}</>
                 ) : (
-                  <><Send size={13} /> Reveal Results</>
+                  <><Send size={13} /> {t.btn_reveal}</>
                 )}
               </button>
             )}
@@ -306,16 +291,7 @@ export default function Questionnaire({ onResults, onBack }: QuestionnaireProps)
   );
 }
 
-const NUMBER_CONSTRAINTS: Record<string, { min: number; max: number; step?: number }> = {
-  Age:           { min: 10,  max: 80  },
-  Height:        { min: 100, max: 230 },
-  Weight:        { min: 30,  max: 200 },
-  '100m Sprint': { min: 9,   max: 30, step: 0.1 },
-  'Standing Jump': { min: 10, max: 120 },
-};
-
-function NumberInput({ label, value, onChange, unit }: { label: string; value: number; onChange: (v: number) => void; unit: string }) {
-  const constraints = NUMBER_CONSTRAINTS[label] ?? { min: 0, max: 9999 };
+function NumberInput({ label, value, onChange, unit, min = 0, max = 9999, step = 1 }: { label: string; value: number; onChange: (v: number) => void; unit: string; min?: number; max?: number; step?: number }) {
   return (
     <div>
       <label
@@ -328,13 +304,13 @@ function NumberInput({ label, value, onChange, unit }: { label: string; value: n
         <input
           type="number"
           value={value}
-          min={constraints.min}
-          max={constraints.max}
-          step={constraints.step ?? 1}
+          min={min}
+          max={max}
+          step={step}
           onChange={(e) => {
             const raw = Number(e.target.value);
-            const clamped = Math.min(constraints.max, Math.max(constraints.min, raw));
-            onChange(isNaN(raw) ? constraints.min : clamped);
+            const clamped = Math.min(max, Math.max(min, raw));
+            onChange(isNaN(raw) ? min : clamped);
           }}
           className="w-full h-full outline-none text-sm pr-10"
           style={{

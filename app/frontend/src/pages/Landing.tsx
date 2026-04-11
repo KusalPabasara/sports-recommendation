@@ -1,28 +1,20 @@
 import { ExternalLink } from 'lucide-react';
+import { useLang } from '../lib/LangContext';
+import LangSwitcher from '../components/LangSwitcher';
 
 interface LandingProps {
   onStart: () => void;
 }
 
-const FEATURES = [
-  {
-    roman: 'I',
-    title: 'Interest-Driven',
-    desc: 'Goes beyond physical tests — your passions, motivations, and personality shape every recommendation.',
-  },
-  {
-    roman: 'II',
-    title: 'Stacking Ensemble',
-    desc: 'XGBoost + Random Forest combined via a logistic regression meta-learner. 17.4% NDCG improvement over baselines.',
-  },
-  {
-    roman: 'III',
-    title: 'Sport Discovery',
-    desc: 'Cosine similarity reveals sports you never considered but would love. 85.7% novelty rate in validation.',
-  },
-];
-
 export default function Landing({ onStart }: LandingProps) {
+  const { t } = useLang();
+
+  const FEATURES = [
+    { roman: 'I',   title: t.feature_1_title, desc: t.feature_1_desc },
+    { roman: 'II',  title: t.feature_2_title, desc: t.feature_2_desc },
+    { roman: 'III', title: t.feature_3_title, desc: t.feature_3_desc },
+  ];
+
   return (
     <div className="deco-bg min-h-screen" style={{ color: 'var(--cream)' }}>
 
@@ -64,20 +56,23 @@ export default function Landing({ onStart }: LandingProps) {
               className="font-display text-base tracking-widest uppercase"
               style={{ color: 'var(--gold)', letterSpacing: '0.2em' }}
             >
-              SportRec
+              {t.nav_brand}
             </span>
           </div>
-          <a
-            href="https://github.com/KusalPabasara/sports-recommendation"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-xs tracking-widest uppercase transition-all duration-300"
-            style={{ color: 'var(--pewter)' }}
-            onMouseEnter={e => (e.currentTarget.style.color = 'var(--gold)')}
-            onMouseLeave={e => (e.currentTarget.style.color = 'var(--pewter)')}
-          >
-            <ExternalLink size={13} /> GitHub
-          </a>
+          <div className="flex items-center gap-4">
+            <LangSwitcher />
+            <a
+              href="https://github.com/KusalPabasara/sports-recommendation"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-xs tracking-widest uppercase transition-all duration-300"
+              style={{ color: 'var(--pewter)' }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--gold)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--pewter)')}
+            >
+              <ExternalLink size={13} /> {t.nav_github}
+            </a>
+          </div>
         </nav>
 
         {/* ── Hero ──────────────────────────────────────────── */}
@@ -96,7 +91,7 @@ export default function Landing({ onStart }: LandingProps) {
               style={{ background: 'var(--gold)', transform: 'rotate(45deg)', flexShrink: 0 }}
               aria-hidden="true"
             />
-            Accepted · ICDSIAI-26
+            {t.landing_badge}
           </div>
 
           {/* Headline */}
@@ -109,9 +104,9 @@ export default function Landing({ onStart }: LandingProps) {
               color: 'var(--cream)',
             }}
           >
-            Discover Your<br />
+            {t.landing_headline_1}<br />
             <span style={{ color: 'var(--gold)', textShadow: '0 0 30px rgba(212,175,55,0.35)' }}>
-              Perfect Sport
+              {t.landing_headline_2}
             </span>
           </h1>
 
@@ -126,9 +121,7 @@ export default function Landing({ onStart }: LandingProps) {
             className="text-base leading-relaxed max-w-xl mx-auto mb-10"
             style={{ color: 'var(--pewter)', letterSpacing: '0.03em' }}
           >
-            AI-powered recommendations shaped by your personal interests, self-rated
-            strengths, and physical profile — not just athletic metrics. Built on a
-            stacking ensemble with a novel-sport discovery mechanism.
+            {t.landing_body}
           </p>
 
           {/* Primary CTA */}
@@ -153,7 +146,7 @@ export default function Landing({ onStart }: LandingProps) {
               el.style.boxShadow = 'none';
             }}
           >
-            Begin Your Profile
+            {t.landing_cta}
             <span
               className="w-4 h-4 inline-block transition-transform duration-300 group-hover:translate-x-1"
               style={{ border: '2px solid currentColor', transform: 'rotate(45deg)' }}
@@ -180,7 +173,7 @@ export default function Landing({ onStart }: LandingProps) {
             <div className="h-px w-12" style={{ background: 'rgba(212,175,55,0.3)' }} />
           </div>
           <p className="text-xs tracking-widest uppercase" style={{ color: 'var(--pewter)' }}>
-            Pabasara W.G.K. — University of Moratuwa, Dept. of CSE
+            {t.footer_credit}
           </p>
         </footer>
       </div>

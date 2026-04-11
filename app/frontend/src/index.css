@@ -50,6 +50,26 @@ body {
 .font-display { font-family: 'Marcellus', serif; }
 .font-body    { font-family: 'Josefin Sans', sans-serif; }
 
+/* ─── Sinhala / Tamil script overrides ──────────────────────── */
+:lang(si) body,
+:lang(si) .font-body {
+  font-family: 'Noto Sans Sinhala', 'Josefin Sans', sans-serif;
+}
+:lang(si) .font-display,
+:lang(si) h1, :lang(si) h2, :lang(si) h3 {
+  font-family: 'Noto Sans Sinhala', serif;
+  letter-spacing: 0;
+}
+:lang(ta) body,
+:lang(ta) .font-body {
+  font-family: 'Noto Sans Tamil', 'Josefin Sans', sans-serif;
+}
+:lang(ta) .font-display,
+:lang(ta) h1, :lang(ta) h2, :lang(ta) h3 {
+  font-family: 'Noto Sans Tamil', serif;
+  letter-spacing: 0;
+}
+
 /* ─── Gold glow utility ──────────────────────────────────────── */
 .glow-gold  { box-shadow: 0 0 18px var(--glow-gold); }
 .glow-strong { box-shadow: 0 0 28px var(--glow-strong); }
