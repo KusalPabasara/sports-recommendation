@@ -1,6 +1,7 @@
 import { ExternalLink } from 'lucide-react';
 import { useLang } from '../lib/LangContext';
 import LangSwitcher from '../components/LangSwitcher';
+import AdUnit from '../components/AdUnit';
 
 interface LandingProps {
   onStart: () => void;
@@ -161,6 +162,9 @@ export default function Landing({ onStart }: LandingProps) {
             <FeatureCard key={f.roman} roman={f.roman} title={f.title} desc={f.desc} />
           ))}
         </div>
+
+        {/* Ad — above footer, high scroll-depth position */}
+        <AdUnit slot="SLOT_LANDING_FOOTER" format="horizontal" />
 
         {/* ── Footer ─────────────────────────────────────────── */}
         <footer

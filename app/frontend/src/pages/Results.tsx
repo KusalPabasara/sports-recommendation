@@ -1,6 +1,7 @@
 import { ArrowLeft } from 'lucide-react';
 import SportCard from '../components/SportCard';
 import LangSwitcher from '../components/LangSwitcher';
+import AdUnit from '../components/AdUnit';
 import type { RecommendResponse } from '../lib/api';
 import { useLang } from '../lib/LangContext';
 
@@ -85,6 +86,9 @@ export default function Results({ data, onRestart }: ResultsProps) {
             </div>
           </ResultSection>
         </div>
+
+        {/* Ad — between play/watch and discovery (high engagement position) */}
+        <AdUnit slot="SLOT_RESULTS_MID" format="horizontal" />
 
         {/* Discovery — full width */}
         <div className="mb-5">
