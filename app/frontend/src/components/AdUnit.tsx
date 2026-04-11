@@ -12,21 +12,18 @@ interface AdUnitProps {
   className?: string;
 }
 
-const PUB_ID = 'ca-pub-PENDING';
+const PUB_ID = 'ca-pub-4717497495220017';
 
 export default function AdUnit({ slot, format = 'auto', className = '' }: AdUnitProps) {
   const pushed = useRef(false);
 
   useEffect(() => {
-    if (PUB_ID === 'ca-pub-PENDING') return;
     if (pushed.current) return;
     pushed.current = true;
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     } catch (_) {}
   }, []);
-
-  if (PUB_ID === 'ca-pub-PENDING') return null;
 
   return (
     <div
