@@ -7,10 +7,16 @@ ICDSIAI-26 paper for real-time sports recommendations.
 
 import sys
 import os
+import logging
+import traceback
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Ensure project src is importable for preprocessor dependencies
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -91,6 +97,7 @@ async def recommend(request: RecommendRequest):
             top_k=request.top_k,
         )
     except Exception as e:
+        logger.error("Prediction error:\n%s", traceback.format_exc())
         raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
 
     return RecommendResponse(
