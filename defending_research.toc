@@ -1,0 +1,39 @@
+\contentsline {section}{\numberline {1}The Big Picture --- What Is This Research About?}{3}{section.1}%
+\contentsline {subsection}{\numberline {1.1}The core idea in one sentence}{3}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}The real-world problem}{3}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}The research question}{3}{subsection.1.3}%
+\contentsline {section}{\numberline {2}Five Key Contributions --- What Is New Here?}{3}{section.2}%
+\contentsline {section}{\numberline {3}Literature Review --- What Others Have Done and Why It Is Not Enough}{4}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Sports talent identification (e.g., AI Sport Scout, Ramos et al.)}{4}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Recommendation systems (Burke, Zhang et al.)}{4}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Sports psychology (Vallerand, Pelletier, Fraser-Thomas)}{4}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Student/youth sports ML (IARCI, Holt)}{5}{subsection.3.4}%
+\contentsline {subsection}{\numberline {3.5}Ensemble learning (Wolpert 1992, Breiman 2001)}{5}{subsection.3.5}%
+\contentsline {section}{\numberline {4}Methodology --- Every Component Explained Simply}{5}{section.4}%
+\contentsline {subsection}{\numberline {4.1}What does the model take as input?}{5}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}What does the model predict?}{5}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}The dataset --- why synthetic is acceptable}{5}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}The affinity score --- how labels are generated}{6}{subsection.4.4}%
+\contentsline {subsection}{\numberline {4.5}Preprocessing}{6}{subsection.4.5}%
+\contentsline {subsection}{\numberline {4.6}Hyperparameter tuning}{6}{subsection.4.6}%
+\contentsline {subsection}{\numberline {4.7}The stacking ensemble}{7}{subsection.4.7}%
+\contentsline {subsection}{\numberline {4.8}The discovery score}{7}{subsection.4.8}%
+\contentsline {section}{\numberline {5}Baselines --- What You Are Compared Against}{7}{section.5}%
+\contentsline {section}{\numberline {6}Results --- Every Number and What It Means}{8}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Evaluation metrics explained}{8}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Play task results (main table)}{9}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}Why B2 Popularity scores high and what that means}{9}{subsection.6.3}%
+\contentsline {subsection}{\numberline {6.4}Watch task results}{9}{subsection.6.4}%
+\contentsline {subsection}{\numberline {6.5}Ablation study --- proving every component matters}{10}{subsection.6.5}%
+\contentsline {subsection}{\numberline {6.6}SHAP feature importance}{10}{subsection.6.6}%
+\contentsline {section}{\numberline {7}Limitations --- Be Honest and Have Answers Ready}{10}{section.7}%
+\contentsline {section}{\numberline {8}Tough Questions Your Professor Will Ask --- With Answers}{11}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Questions about methodology}{11}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}Questions about the research contribution}{13}{subsection.8.2}%
+\contentsline {subsection}{\numberline {8.3}Questions about the conference and publication}{13}{subsection.8.3}%
+\contentsline {section}{\numberline {9}Sponsorship Case --- How to Argue for Funding}{14}{section.9}%
+\contentsline {subsection}{\numberline {9.1}What you are asking for}{14}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}Arguments to make to your professor / department}{14}{subsection.9.2}%
+\contentsline {subsection}{\numberline {9.3}Suggested email / talking points structure}{15}{subsection.9.3}%
+\contentsline {section}{\numberline {10}Quick Reference Card --- Numbers to Know Instantly}{15}{section.10}%
+\contentsline {section}{\numberline {11}The Story to Tell --- One Narrative From Start to Finish}{16}{section.11}%

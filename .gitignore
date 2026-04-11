@@ -36,3 +36,10 @@ Thumbs.db
 
 # Experiments (keep model weights)
 experiments/*.pkl
+
+# Deployed model artifacts (large, regenerate via scripts/train_and_save.py)
+app/models/*.pkl
+
+# Frontend build output
+app/frontend/dist/
+app/frontend/node_modules/

@@ -1,0 +1,23 @@
+/** Emoji icons for each sport — lightweight, no asset loading. */
+export const SPORT_ICONS: Record<string, string> = {
+  football_soccer: '⚽',
+  cricket: '🏏',
+  basketball: '🏀',
+  tennis: '🎾',
+  badminton: '🏸',
+  table_tennis: '🏓',
+  volleyball: '🏐',
+  swimming: '🏊',
+  athletics_track: '🏃',
+  cycling: '🚴',
+  martial_arts: '🥋',
+  boxing: '🥊',
+  gymnastics: '🤸',
+  archery: '🏹',
+  rock_climbing: '🧗',
+  rugby: '🏉',
+  weightlifting: '🏋️',
+  esports: '🎮',
+  skateboarding: '🛹',
+  rowing: '🚣',
+};

@@ -1,5 +1,8 @@
 # Interest-Driven Personalized Sports Recommendation System
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-sports.gmora.dev-6366f1?style=for-the-badge&logo=vercel)](https://sports.gmora.dev)
+[![Accepted at ICDSIAI-26](https://img.shields.io/badge/Accepted-ICDSIAI--26-06b6d4?style=for-the-badge)](https://github.com/KusalPabasara/sports-recommendation)
+
 > A multi-task machine learning framework that recommends sports to general users based primarily on personal interests, with secondary factors of physical strengths and abilities — across three engagement levels: **playing**, **watching**, and **professional potential**.
 
 ---
