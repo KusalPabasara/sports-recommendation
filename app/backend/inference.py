@@ -146,6 +146,8 @@ class ModelServer:
         blended = self.discovery.blend(
             play_scores, X, interest_indices, tried_mask=tried_mask
         )
+        # Zero out tried sports entirely so they never appear in discovery
+        blended = blended * (1 - tried_mask)
 
         # Rank and format
         play_recs = self._rank(play_scores[0], sports, top_k, is_discovery=False)

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, Send, Loader2 } from 'lucide-react';
 import StepProgress from '../components/StepProgress';
 import LikertSlider from '../components/LikertSlider';
@@ -292,6 +292,13 @@ export default function Questionnaire({ onResults, onBack }: QuestionnaireProps)
 }
 
 function NumberInput({ label, value, onChange, unit, min = 0, max = 9999, step = 1 }: { label: string; value: number; onChange: (v: number) => void; unit: string; min?: number; max?: number; step?: number }) {
+  const [draft, setDraft] = useState(String(value));
+  const [focused, setFocused] = useState(false);
+
+  useEffect(() => {
+    if (!focused) setDraft(String(value));
+  }, [value, focused]);
+
   return (
     <div>
       <label
@@ -303,14 +310,25 @@ function NumberInput({ label, value, onChange, unit, min = 0, max = 9999, step =
       <div className="relative h-12 flex items-center" style={{ borderBottom: '2px solid var(--gold)' }}>
         <input
           type="number"
-          value={value}
+          value={focused ? draft : value}
           min={min}
           max={max}
           step={step}
+          onFocus={() => {
+            setFocused(true);
+            setDraft(String(value));
+          }}
           onChange={(e) => {
-            const raw = Number(e.target.value);
-            const clamped = Math.min(max, Math.max(min, raw));
-            onChange(isNaN(raw) ? min : clamped);
+            setDraft(e.target.value);
+          }}
+          onBlur={() => {
+            setFocused(false);
+            const raw = Number(draft);
+            if (isNaN(raw) || draft.trim() === '') {
+              onChange(min);
+            } else {
+              onChange(Math.min(max, Math.max(min, raw)));
+            }
           }}
           className="w-full h-full outline-none text-sm pr-10"
           style={{
