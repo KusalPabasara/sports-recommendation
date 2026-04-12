@@ -40,6 +40,7 @@ jobs:
             set -e
             echo "=== Pulling latest code ==="
             cd /opt/sports-rec
+            git checkout -- .
             git pull origin main
 
             echo "=== Installing Python dependencies ==="
@@ -73,9 +74,9 @@ jobs:
       - name: Health check
         run: |
           sleep 5
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://sports.gmora.dev/api/health)
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://gmora.dev/api/health)
           if [ "$STATUS" = "200" ]; then
-            echo "Health check passed — https://sports.gmora.dev is live"
+            echo "Health check passed — https://gmora.dev is live"
           else
             echo "Health check FAILED — HTTP $STATUS"
             exit 1
