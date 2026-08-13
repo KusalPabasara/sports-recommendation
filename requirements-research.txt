@@ -1,0 +1,9 @@
+-r requirements.txt
+scipy>=1.10
+shap>=0.43
+torch>=2.0
+matplotlib>=3.7
+seaborn>=0.12
+plotly>=5.15
+jupyterlab>=4.0
+ipykernel>=6.0

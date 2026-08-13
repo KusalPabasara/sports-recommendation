@@ -51,7 +51,8 @@ ML research/
 ├── results/                         # Output plots and tables
 ├── plan.md                          # Full research plan with timeline
 ├── claude.md                        # Project context for AI-assisted sessions
-└── requirements.txt
+├── requirements.txt                 # Production API dependencies
+└── requirements-research.txt        # Full notebook/experiment dependencies
 ```
 
 ---
@@ -63,8 +64,8 @@ ML research/
 python3 -m venv .venv
 source .venv/bin/activate
 
-# Install dependencies
-pip install -r requirements.txt
+# Install full research dependencies
+pip install -r requirements-research.txt
 ```
 
 ---

@@ -43,3 +43,6 @@ app/models/*.pkl
 # Frontend build output
 app/frontend/dist/
 app/frontend/node_modules/
+.vercel
+.env*
+.vercel_python_packages/

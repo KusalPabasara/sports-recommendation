@@ -293,19 +293,33 @@ class StackingEnsemble:
     Classical ML ensemble — no neural networks.
     """
 
-    def __init__(self, cv: int = 3) -> None:
+    def __init__(
+        self,
+        cv: int = 3,
+        xgb_estimators: int = 200,
+        xgb_max_depth: int = 5,
+        rf_estimators: int = 200,
+        rf_max_depth: int = 8,
+    ) -> None:
         self.cv = cv
+        self.xgb_estimators = xgb_estimators
+        self.xgb_max_depth = xgb_max_depth
+        self.rf_estimators = rf_estimators
+        self.rf_max_depth = rf_max_depth
         self.model = None
 
     def fit(self, X: np.ndarray, y: np.ndarray) -> "StackingEnsemble":
         xgb = XGBClassifier(
-            n_estimators=200, max_depth=5, learning_rate=0.05,
+            n_estimators=self.xgb_estimators,
+            max_depth=self.xgb_max_depth,
+            learning_rate=0.05,
             subsample=0.8, colsample_bytree=0.8,
             use_label_encoder=False, eval_metric="logloss",
             random_state=RANDOM_STATE, verbosity=0,
         )
         rf = RandomForestClassifier(
-            n_estimators=200, max_depth=8,
+            n_estimators=self.rf_estimators,
+            max_depth=self.rf_max_depth,
             min_samples_leaf=5, random_state=RANDOM_STATE, n_jobs=-1,
         )
         stack = StackingClassifier(

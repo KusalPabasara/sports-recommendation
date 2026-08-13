@@ -1,0 +1,12 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "buildCommand": "npm --prefix app/frontend ci && npm --prefix app/frontend run build",
+  "outputDirectory": "app/frontend/dist",
+  "functions": {
+    "api/index.py": {
+      "includeFiles": "app/models/**",
+      "excludeFiles": "{data/**,experiments/**,literature/**,notebooks/**,paper/**,paper-icdsiai/**,results/**,survey/**,app/frontend/**}"
+    }
+  }
+}

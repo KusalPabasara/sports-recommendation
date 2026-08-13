@@ -1,0 +1,18 @@
+# Research and publication artifacts are not needed at runtime.
+/data/
+/experiments/
+/literature/
+/notebooks/
+/paper/
+/paper-icdsiai/
+/results/
+/survey/
+/defending_research.*
+/sample-abstract-template.docx
+/sample-full-paper-template.doc
+
+# Local/runtime-generated files.
+/app/deploy/
+/app/frontend/dist/
+/app/models/*.pkl
+**/__pycache__/

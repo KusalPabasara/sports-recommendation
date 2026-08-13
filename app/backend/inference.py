@@ -1,5 +1,6 @@
 """Model loading and inference logic for the Sports Recommendation API."""
 
+import gzip
 import json
 import os
 import pickle
@@ -55,17 +56,24 @@ class ModelServer:
 
     def load(self):
         """Load all serialized models from disk."""
-        with open(os.path.join(MODELS_DIR, "stacking_play.pkl"), "rb") as f:
-            self.stack_play = pickle.load(f)
-        with open(os.path.join(MODELS_DIR, "stacking_watch.pkl"), "rb") as f:
-            self.stack_watch = pickle.load(f)
-        with open(os.path.join(MODELS_DIR, "discovery_scorer.pkl"), "rb") as f:
-            self.discovery = pickle.load(f)
-        with open(os.path.join(MODELS_DIR, "preprocessor.pkl"), "rb") as f:
-            self.preprocessor = pickle.load(f)
+        self.stack_play = self._load_pickle("stacking_play")
+        self.stack_watch = self._load_pickle("stacking_watch")
+        self.discovery = self._load_pickle("discovery_scorer")
+        self.preprocessor = self._load_pickle("preprocessor")
         with open(os.path.join(MODELS_DIR, "metadata.json"), "r") as f:
             self.metadata = json.load(f)
         self._loaded = True
+
+    @staticmethod
+    def _load_pickle(name: str):
+        """Load a compressed production artifact, with local .pkl fallback."""
+        compressed_path = os.path.join(MODELS_DIR, f"{name}.pkl.gz")
+        if os.path.exists(compressed_path):
+            with gzip.open(compressed_path, "rb") as f:
+                return pickle.load(f)
+
+        with open(os.path.join(MODELS_DIR, f"{name}.pkl"), "rb") as f:
+            return pickle.load(f)
 
     def _build_feature_vector(self, features: dict) -> np.ndarray:
         """

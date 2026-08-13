@@ -16,6 +16,7 @@ Outputs to app/models/:
 """
 
 import json
+import gzip
 import os
 import pickle
 import sys
@@ -59,7 +60,17 @@ def main():
     print("\n" + "=" * 60)
     print("Step 2: Training StackingEnsemble (play task)...")
     print("=" * 60)
-    stack_play = StackingEnsemble(cv=3)
+    # A compact production configuration preserves the paper's XGBoost + RF
+    # stacking architecture while keeping serverless artifacts and cold starts
+    # small. Full research experiments continue to use the class defaults.
+    production_stack = {
+        "cv": 3,
+        "xgb_estimators": 40,
+        "xgb_max_depth": 3,
+        "rf_estimators": 60,
+        "rf_max_depth": 6,
+    }
+    stack_play = StackingEnsemble(**production_stack)
     stack_play.fit(X_train, y_play_train)
     print("  Play model trained.")
 
@@ -67,7 +78,7 @@ def main():
     print("\n" + "=" * 60)
     print("Step 3: Training StackingEnsemble (watch task)...")
     print("=" * 60)
-    stack_watch = StackingEnsemble(cv=3)
+    stack_watch = StackingEnsemble(**production_stack)
     stack_watch.fit(X_train, y_watch_train)
     print("  Watch model trained.")
 
@@ -87,14 +98,14 @@ def main():
     print("=" * 60)
 
     artifacts = {
-        "stacking_play.pkl": stack_play,
-        "stacking_watch.pkl": stack_watch,
-        "discovery_scorer.pkl": discovery,
-        "preprocessor.pkl": prep,
+        "stacking_play.pkl.gz": stack_play,
+        "stacking_watch.pkl.gz": stack_watch,
+        "discovery_scorer.pkl.gz": discovery,
+        "preprocessor.pkl.gz": prep,
     }
     for name, obj in artifacts.items():
         path = os.path.join(OUTPUT_DIR, name)
-        with open(path, "wb") as f:
+        with gzip.open(path, "wb", compresslevel=9) as f:
             pickle.dump(obj, f)
         size_kb = os.path.getsize(path) / 1024
         print(f"  Saved {name} ({size_kb:.1f} KB)")
