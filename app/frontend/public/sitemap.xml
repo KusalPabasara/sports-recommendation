@@ -2,13 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://gmora.dev/</loc>
+    <loc>https://sports-recommendation.vercel.app/</loc>
     <lastmod>2026-04-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://gmora.dev/" />
-    <xhtml:link rel="alternate" hreflang="si" href="https://gmora.dev/" />
-    <xhtml:link rel="alternate" hreflang="ta" href="https://gmora.dev/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://gmora.dev/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://sports-recommendation.vercel.app/" />
+    <xhtml:link rel="alternate" hreflang="si" href="https://sports-recommendation.vercel.app/" />
+    <xhtml:link rel="alternate" hreflang="ta" href="https://sports-recommendation.vercel.app/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://sports-recommendation.vercel.app/" />
   </url>
 </urlset>
