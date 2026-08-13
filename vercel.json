@@ -8,5 +8,11 @@
       "includeFiles": "app/models/**",
       "excludeFiles": "{data/**,experiments/**,literature/**,notebooks/**,paper/**,paper-icdsiai/**,results/**,survey/**,app/frontend/**,app/deploy/**,defending_research.*,sample-abstract-template.docx,sample-full-paper-template.doc}"
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/index"
+    }
+  ]
 }
