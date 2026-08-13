@@ -6,7 +6,7 @@
   "functions": {
     "api/index.py": {
       "includeFiles": "app/models/**",
-      "excludeFiles": "{data/**,experiments/**,literature/**,notebooks/**,paper/**,paper-icdsiai/**,results/**,survey/**,app/frontend/**}"
+      "excludeFiles": "{data/**,experiments/**,literature/**,notebooks/**,paper/**,paper-icdsiai/**,results/**,survey/**,app/frontend/**,app/deploy/**,defending_research.*,sample-abstract-template.docx,sample-full-paper-template.doc}"
     }
   }
 }
